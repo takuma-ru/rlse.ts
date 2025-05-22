@@ -18,6 +18,7 @@ program
   .option("-n, --name <name>", "package name")
   .option("--pre", "Release new pre-release")
   .option("-l, --level <patch | minor | major | pre>", "release level")
+  .option("-v, --version <version>", "release version")
   .option("-c, --build-cmd <cmd>", "build command")
   .option("--git-user-name <name>", "git config --local user.name <name>")
   .option("--git-user-email <email>", "git config --local user.email <email>")

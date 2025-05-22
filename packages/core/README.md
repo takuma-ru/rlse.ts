@@ -32,6 +32,7 @@ npm run rlse
 | ---------------- | --------------------------------------- | ---------- | ------- |
 | -n, --name       | Package name                            | `string`   |         |
 | -l, --level      | Release level                           | `string`   |         |
+| -v, --version    | Release version                         | `string`   |         |
 | -c, --command    | Build command                           | `string`   |         |
 | --pre            | Pre-release                             | `boolean`  | `false` |
 | --git-user-name  | git config --local user.name `<name>`   | `string`   |         |

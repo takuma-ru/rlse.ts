@@ -17,6 +17,7 @@ export const releaseAction = async (options: unknown) => {
     gitUserEmail,
     skipStep,
     dryRun,
+    version
   } = parseReleaseSchema(options);
 
   const {
@@ -67,6 +68,7 @@ export const releaseAction = async (options: unknown) => {
     packageVersionControl({
       level,
       pre,
+      version,
       packageJsonPath,
     });
 

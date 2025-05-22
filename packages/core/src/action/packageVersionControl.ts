@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
-import { type ReleaseType, inc } from "semver";
+import { inc, type ReleaseType } from "semver";
 import { cmd } from "../utils/cmd";
 import type { ReleaseSchemaType } from "../validation/validation";
 
@@ -30,7 +30,7 @@ export const packageVersionControl = ({
 
   consola.info(`Current version: ${currentVersion}`);
 
-  let newVersion = null;
+  let newVersion: string | null = null;
 
   if (level === "fix") {
     if (!version) {
