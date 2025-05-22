@@ -18,7 +18,7 @@ export const releaseSchema = z.object({
       message: "Invalid release level",
     },
   ),
-  version: z.string().optional(),
+  releaseVersion: z.string().optional(),
   buildCmd: z.string().min(1, {
     message: "Invalid build command",
   }),

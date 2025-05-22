@@ -7,9 +7,9 @@ import type { ReleaseSchemaType } from "../validation/validation";
 export const packageVersionControl = ({
   level,
   pre,
-  version,
+  releaseVersion,
   packageJsonPath,
-}: Pick<ReleaseSchemaType, "level" | "pre" | "version"> & {
+}: Pick<ReleaseSchemaType, "level" | "pre" | "releaseVersion"> & {
   packageJsonPath: string;
 }) => {
   let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
@@ -33,12 +33,12 @@ export const packageVersionControl = ({
   let newVersion: string | null = null;
 
   if (level === "fix") {
-    if (!version) {
+    if (!releaseVersion) {
       consola.error("Version is required for fix level");
       process.exit(1);
     }
 
-    newVersion = version;
+    newVersion = releaseVersion;
   } else {
     const getReleaseType = (): ReleaseType => {
       switch (level) {

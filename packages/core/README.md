@@ -28,16 +28,16 @@ npm run rlse
 
 ## Configure settings via CLI
 
-| Option           | Description                             | Type       | Default |
-| ---------------- | --------------------------------------- | ---------- | ------- |
-| -n, --name       | Package name                            | `string`   |         |
-| -l, --level      | Release level                           | `string`   |         |
-| -v, --version    | Release version                         | `string`   |         |
-| -c, --command    | Build command                           | `string`   |         |
-| --pre            | Pre-release                             | `boolean`  | `false` |
-| --git-user-name  | git config --local user.name `<name>`   | `string`   |         |
-| --git-user-email | git config --local user.email `<email>` | `string`   |         |
-| -k               | Skip release step                       | `string[]` | `[]`    |
+| Option                | Description                             | Type       | Default |
+| --------------------- | --------------------------------------- | ---------- | ------- |
+| -n, --name            | Package name                            | `string`   |         |
+| -l, --level           | Release level                           | `string`   |         |
+| -r, --release-version | Release version                         | `string`   |         |
+| -c, --command         | Build command                           | `string`   |         |
+| --pre                 | Pre-release                             | `boolean`  | `false` |
+| --git-user-name       | git config --local user.name `<name>`   | `string`   |         |
+| --git-user-email      | git config --local user.email `<email>` | `string`   |         |
+| -k                    | Skip release step                       | `string[]` | `[]`    |
 
 ## Configure settings via Setting file
 
@@ -74,7 +74,7 @@ type RlseConfig = {
   name?: string | undefined;
   pre?: boolean | undefined;
   level?: "patch" | "minor" | "major" | "preup" | "fix" | undefined;
-  version?: string | undefined;
+  releaseVersion?: string | undefined;
   buildCmd?: string | undefined;
   dryRun?: boolean | undefined;
   gitUserName?: string | undefined;
