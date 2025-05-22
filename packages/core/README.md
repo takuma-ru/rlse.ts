@@ -72,7 +72,8 @@ export default defineConfig({
 type RlseConfig = {
   name?: string | undefined;
   pre?: boolean | undefined;
-  level?: "patch" | "minor" | "major" | "preup" | undefined;
+  level?: "patch" | "minor" | "major" | "preup" | "fix" | undefined;
+  version?: string | undefined;
   buildCmd?: string | undefined;
   dryRun?: boolean | undefined;
   gitUserName?: string | undefined;

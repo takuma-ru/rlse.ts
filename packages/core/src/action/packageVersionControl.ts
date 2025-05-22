@@ -7,8 +7,11 @@ import type { ReleaseSchemaType } from "../validation/validation";
 export const packageVersionControl = ({
   level,
   pre,
+  version,
   packageJsonPath,
-}: Pick<ReleaseSchemaType, "level" | "pre"> & { packageJsonPath: string }) => {
+}: Pick<ReleaseSchemaType, "level" | "pre" | "version"> & {
+  packageJsonPath: string;
+}) => {
   let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 
   const currentVersion = cmd(`npm show ${packageJson.name} version`, {
@@ -27,29 +30,40 @@ export const packageVersionControl = ({
 
   consola.info(`Current version: ${currentVersion}`);
 
-  const getReleaseType = (): ReleaseType => {
-    switch (level) {
-      case "patch": {
-        if (pre) return "prepatch";
-        return "patch";
-      }
-      case "minor": {
-        if (pre) return "preminor";
-        return "minor";
-      }
-      case "major": {
-        if (pre) return "premajor";
-        return "major";
-      }
-      case "preup": {
-        return "prerelease";
-      }
-      default: {
-        return "patch";
-      }
+  let newVersion = null;
+
+  if (level === "fix") {
+    if (!version) {
+      consola.error("Version is required for fix level");
+      process.exit(1);
     }
-  };
-  const newVersion = inc(currentVersion, getReleaseType(), "beta");
+
+    newVersion = version;
+  } else {
+    const getReleaseType = (): ReleaseType => {
+      switch (level) {
+        case "patch": {
+          if (pre) return "prepatch";
+          return "patch";
+        }
+        case "minor": {
+          if (pre) return "preminor";
+          return "minor";
+        }
+        case "major": {
+          if (pre) return "premajor";
+          return "major";
+        }
+        case "preup": {
+          return "prerelease";
+        }
+        default: {
+          return "patch";
+        }
+      }
+    };
+    newVersion = inc(currentVersion, getReleaseType(), "beta");
+  }
 
   const versionUp = () => {
     packageJson.version = newVersion;

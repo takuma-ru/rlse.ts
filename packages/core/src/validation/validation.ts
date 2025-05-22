@@ -12,11 +12,13 @@ export const releaseSchema = z.object({
       z.literal("minor"),
       z.literal("major"),
       z.literal("preup"),
+      z.literal("fix")
     ],
     {
       message: "Invalid release level",
     },
   ),
+  version: z.string().optional(),
   buildCmd: z.string().min(1, {
     message: "Invalid build command",
   }),
