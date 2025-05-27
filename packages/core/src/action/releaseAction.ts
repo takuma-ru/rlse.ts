@@ -50,6 +50,14 @@ export const releaseAction = async (options: unknown) => {
     }
   }
 
+  const { newVersion, packageName, versionUp, versionReset } =
+    packageVersionControl({
+      level,
+      pre,
+      releaseVersion,
+      packageJsonPath,
+    });
+
   const baseBranch = cmd("git branch --show-current", {
     execOptions: {
       stdio: "pipe",
@@ -62,15 +70,7 @@ export const releaseAction = async (options: unknown) => {
   });
   const releaseBranch = isCreateReleaseBranchStepSkipped
     ? baseBranch
-    : `release/${new Date().toISOString().replace(/[-:.]/g, "_")}`;
-
-  const { newVersion, packageName, versionUp, versionReset } =
-    packageVersionControl({
-      level,
-      pre,
-      releaseVersion,
-      packageJsonPath,
-    });
+    : `release/${packageName}.${newVersion}`;
 
   const resetAction = () => {
     if (isCommitChangesStepSkipped) {
