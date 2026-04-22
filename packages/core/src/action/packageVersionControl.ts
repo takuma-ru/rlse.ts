@@ -63,6 +63,9 @@ export const packageVersionControl = ({
       }
     };
     newVersion = inc(currentVersion, getReleaseType(), "beta");
+    if (!newVersion) {
+      throw new Error("Failed to calculate next version");
+    }
   }
 
   const versionUp = () => {

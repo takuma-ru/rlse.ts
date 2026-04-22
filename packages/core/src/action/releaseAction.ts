@@ -17,7 +17,7 @@ export const releaseAction = async (options: unknown) => {
     gitUserEmail,
     skipStep,
     dryRun,
-    releaseVersion
+    releaseVersion,
   } = parseReleaseSchema(options);
 
   const {
@@ -149,21 +149,17 @@ export const releaseAction = async (options: unknown) => {
         publishArgs.push("--dry-run");
       }
 
-      cmdFile(
-        "pnpm",
-        publishArgs,
-        {
-          successCallback: (stdout) => {
-            consola.success(`Published ${packageName} ${newVersion}`);
+      cmdFile("pnpm", publishArgs, {
+        successCallback: (stdout) => {
+          consola.success(`Published ${packageName} ${newVersion}`);
 
-            if (dryRun) {
-              resetAction();
-            }
+          if (dryRun) {
+            resetAction();
+          }
 
-            return stdout;
-          },
+          return stdout;
         },
-      );
+      });
     }
   } catch (error) {
     consola.error(error);

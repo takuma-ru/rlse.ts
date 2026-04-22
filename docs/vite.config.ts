@@ -55,13 +55,16 @@ export default defineConfig({
                 },
               ],
               parseMetaString: (metaString, _node, _tree) => {
-                const meta = metaString.split(",").reduce((acc, str) => {
-                  if (!str) return acc;
+                const meta = metaString.split(",").reduce(
+                  (acc, str) => {
+                    if (!str) return acc;
 
-                  const [key, value] = str.split("=");
-                  acc[`data-${key}`] = value;
-                  return acc;
-                }, {} as Record<string, string>);
+                    const [key, value] = str.split("=");
+                    acc[`data-${key}`] = value;
+                    return acc;
+                  },
+                  {} as Record<string, string>,
+                );
 
                 return meta;
               },

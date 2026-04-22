@@ -26,13 +26,13 @@ program
     "-k, --skip-step <<config | create-release-branch | build | commit-changes | publish>...>",
     "Skip release steps (comma separated list!)",
     commaSeparatedList,
-    undefined
+    undefined,
   )
   .option("--dry-run", "Dry run")
   .action(async (options) => {
     const optionFromFile = await loadRlseConfig();
     const mergedOptions = { ...optionFromFile, ...options };
-    releaseAction(mergedOptions);
+    await releaseAction(mergedOptions);
   });
 
 program.parse();

@@ -12,7 +12,7 @@ export const releaseSchema = z.object({
       z.literal("minor"),
       z.literal("major"),
       z.literal("preup"),
-      z.literal("fix")
+      z.literal("fix"),
     ],
     {
       message: "Invalid release level",
@@ -43,7 +43,7 @@ export const releaseSchema = z.object({
   dryRun: z.boolean().optional().default(false),
 });
 
-export const parseReleaseSchema = (options: unknown) => {
+export const parseReleaseSchema = (options: unknown): ReleaseSchemaType => {
   const { data, error } = releaseSchema.safeParse(options);
   if (error) {
     consola.error(error.errors.map((e) => e.message).join("\n"));

@@ -6,7 +6,6 @@ import "./reset.css";
 import "github-markdown-css";
 import "./main.css.ts";
 
-// biome-ignore lint/style/noNonNullAssertion: <explanation>
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />

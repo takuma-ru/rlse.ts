@@ -2,29 +2,37 @@
   "name": "rlse-workspace",
   "version": "0.0.0",
   "description": "",
+  "keywords": [],
+  "license": "MPL-2.0",
+  "author": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "lint": "pnpm exec oxlint --config ./oxlint.config.ts .",
+    "lint:fix": "pnpm exec oxlint --config ./oxlint.config.ts --fix .",
+    "fmt": "pnpm exec oxfmt --config ./oxfmt.config.ts .",
+    "fmt:check": "pnpm exec oxfmt --config ./oxfmt.config.ts --check .",
+    "check": "pnpm run fmt:check && pnpm run lint",
     "p:core": "pnpm -C packages/core",
     "pg:vanilla-ts": "pnpm -C playgrounds/vanilla-ts",
     "p:docs": "pnpm -C docs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MPL-2.0",
   "devDependencies": {
-    "@biomejs/biome": "^2.0.0-beta.5",
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0",
+    "oxlint-tsgolint": "^0.21.1",
     "turbo": "^2.0.6"
   },
   "engines": {
-    "pnpm": "9.5.0",
     "npm": "please_use_pnpm_instead",
+    "pnpm": "9.5.0",
     "yarn": "please_use_pnpm_instead"
   },
-  "packageManager": "pnpm@9.5.0",
   "volta": {
     "node": "22.1.0",
     "pnpm": "9.5.0"
-  }
+  },
+  "packageManager": "pnpm@9.5.0"
 }

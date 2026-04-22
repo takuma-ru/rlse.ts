@@ -1,12 +1,16 @@
 {
   "name": "docs",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "pnpm exec oxlint --config ../oxlint.config.ts .",
+    "lint:fix": "pnpm exec oxlint --config ../oxlint.config.ts --fix .",
+    "format": "pnpm exec oxfmt --config ../oxfmt.config.ts .",
+    "format:check": "pnpm exec oxfmt --config ../oxfmt.config.ts --check .",
+    "check": "pnpm run format:check && pnpm run lint",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,7 +26,6 @@
     "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.8.0",
     "@iconify/json": "^2.2.235",
     "@shikijs/rehype": "^1.12.1",
     "@svgr/core": "^8.1.0",
@@ -33,13 +36,9 @@
     "@types/unist": "^3.0.3",
     "@vanilla-extract/vite-plugin": "^4.0.13",
     "@vitejs/plugin-react": "^4.3.1",
-    "eslint": "^9.8.0",
-    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
-    "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "hast": "^1.0.0",
     "typescript": "^5.5.3",
-    "typescript-eslint": "^8.0.0",
     "unist": "^0.0.1",
     "unist-util-visit": "^5.0.0",
     "unplugin-fonts": "^1.1.1",

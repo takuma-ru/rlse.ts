@@ -1,30 +1,31 @@
 {
   "name": "@takuma-ru/rlse",
-  "private": false,
   "version": "0.0.1-beta.4",
-  "author": "takuma-ru <takuma-ru@takumaru.dev> (https://github.com/takuma-ru/)",
+  "private": false,
   "homepage": "https://github.com/takuma-ru/rlse",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/takuma-ru/rlse"
-  },
   "bugs": {
     "url": "https://github.com/takuma-ru/rlse/issues",
     "email": "takuma-ru@takumaru.dev"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "provenance": true
-  },
   "license": "MPL-2.0",
+  "author": "takuma-ru <takuma-ru@takumaru.dev> (https://github.com/takuma-ru/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/takuma-ru/rlse"
+  },
+  "bin": {
+    "rlse": "./bin/bin.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "LICENSE",
+    "README.md"
+  ],
   "type": "module",
   "main": "./dist/main.cjs",
   "module": "./dist/main.js",
   "types": "./dist/main.d.ts",
-  "bin": {
-    "rlse": "./bin/bin.js"
-  },
   "exports": {
     ".": {
       "import": {
@@ -37,20 +38,27 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "bin",
-    "LICENSE",
-    "README.md"
-  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsup",
-    "lint": "biome lint --apply ./src",
-    "format": "biome format --apply ./src",
-    "check": "biome check --apply ./src",
+    "lint": "pnpm exec oxlint --config ../../oxlint.config.ts .",
+    "lint:fix": "pnpm exec oxlint --config ../../oxlint.config.ts --fix .",
+    "format": "pnpm exec oxfmt --config ../../oxfmt.config.ts .",
+    "format:check": "pnpm exec oxfmt --config ../../oxfmt.config.ts --check .",
+    "check": "pnpm run format:check && pnpm run lint",
     "start": "node ./dist/main.js",
     "link:core": "pnpm link .",
     "release": "pnpm link:core && rlse"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "consola": "^3.2.3",
+    "semver": "^7.6.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@takuma-ru/rlse": "workspace:*",
@@ -58,11 +66,5 @@
     "@types/semver": "^7.5.8",
     "tsup": "^8.1.0",
     "typescript": "^5.2.2"
-  },
-  "dependencies": {
-    "commander": "^12.1.0",
-    "consola": "^3.2.3",
-    "semver": "^7.6.2",
-    "zod": "^3.23.8"
   }
 }
