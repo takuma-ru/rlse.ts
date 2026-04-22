@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
 import { inc, type ReleaseType } from "semver";
-import { cmd } from "../utils/cmd";
+import { cmdFile } from "../utils/cmd";
 import type { ReleaseSchemaType } from "../validation/validation";
 
 export const packageVersionControl = ({
@@ -14,7 +14,7 @@ export const packageVersionControl = ({
 }) => {
   let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 
-  const currentVersion = cmd(`npm show ${packageJson.name} version`, {
+  const currentVersion = cmdFile("npm", ["show", packageJson.name, "version"], {
     execOptions: {
       stdio: "pipe",
       encoding: "utf8",

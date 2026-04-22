@@ -1,6 +1,6 @@
 import process from "node:process";
 import consola from "consola";
-import { cmd } from "../utils/cmd";
+import { cmd, cmdFile } from "../utils/cmd";
 import { parseReleaseSchema } from "../validation/validation";
 import { findPackageJsonByName } from "./findPackageJsonByName";
 import { getSkipStep } from "./getSkipStep";
@@ -43,10 +43,10 @@ export const releaseAction = async (options: unknown) => {
 
   if (!isConfigStepSkipped) {
     if (gitUserName) {
-      cmd(`git config --local user.name ${gitUserName}`);
+      cmdFile("git", ["config", "--local", "user.name", gitUserName]);
     }
     if (gitUserEmail) {
-      cmd(`git config --local user.email ${gitUserEmail}`);
+      cmdFile("git", ["config", "--local", "user.email", gitUserEmail]);
     }
   }
 
@@ -58,7 +58,7 @@ export const releaseAction = async (options: unknown) => {
       packageJsonPath,
     });
 
-  const baseBranch = cmd("git branch --show-current", {
+  const baseBranch = cmdFile("git", ["branch", "--show-current"], {
     execOptions: {
       stdio: "pipe",
       encoding: "utf8",
@@ -76,12 +76,12 @@ export const releaseAction = async (options: unknown) => {
     if (isCommitChangesStepSkipped) {
       versionReset();
     } else {
-      cmd(`git checkout -- ${packageJsonPath}`);
+      cmdFile("git", ["checkout", "--", packageJsonPath]);
     }
     if (!isCreateReleaseBranchStepSkipped) {
-      cmd(`git switch ${baseBranch}`);
-      cmd(`git branch -D ${releaseBranch}`);
-      cmd(`git push origin --delete ${releaseBranch}`);
+      cmdFile("git", ["switch", baseBranch]);
+      cmdFile("git", ["branch", "-D", releaseBranch]);
+      cmdFile("git", ["push", "origin", "--delete", releaseBranch]);
     }
   };
 
@@ -90,13 +90,13 @@ export const releaseAction = async (options: unknown) => {
     versionUp();
 
     if (!isCreateReleaseBranchStepSkipped) {
-      cmd(`git switch -c ${releaseBranch}`, {
+      cmdFile("git", ["switch", "-c", releaseBranch], {
         successCallback: (stdout) => {
           consola.success(`Switched to ${releaseBranch}`);
           return stdout;
         },
       });
-      cmd(`git push --set-upstream origin ${releaseBranch}`, {
+      cmdFile("git", ["push", "--set-upstream", "origin", releaseBranch], {
         successCallback: (stdout) => {
           consola.success(`Pushed to ${releaseBranch}`);
           return stdout;
@@ -118,19 +118,19 @@ export const releaseAction = async (options: unknown) => {
     }
 
     if (!isCommitChangesStepSkipped) {
-      cmd(`git add ${packageJsonPath}`, {
+      cmdFile("git", ["add", packageJsonPath], {
         successCallback: (stdout) => {
           consola.success(`Added ${packageJsonPath}`);
           return stdout;
         },
       });
-      cmd(`git commit -m "Release ${packageName} ${newVersion}"`, {
+      cmdFile("git", ["commit", "-m", `Release ${packageName} ${newVersion}`], {
         successCallback: (stdout) => {
           consola.success(`Committed ${packageName} ${newVersion}`);
           return stdout;
         },
       });
-      cmd(`git push origin ${releaseBranch}`, {
+      cmdFile("git", ["push", "origin", releaseBranch], {
         successCallback: (stdout) => {
           consola.success(`Pushed ${packageName} ${newVersion}`);
           return stdout;
@@ -139,10 +139,19 @@ export const releaseAction = async (options: unknown) => {
     }
 
     if (!isPublishStepSkipped) {
-      cmd(
-        `pnpm publish --filter ${packageName} --no-git-checks ${
-          dryRun ? "--dry-run" : ""
-        }`,
+      const publishArgs = [
+        "publish",
+        "--filter",
+        packageName,
+        "--no-git-checks",
+      ];
+      if (dryRun) {
+        publishArgs.push("--dry-run");
+      }
+
+      cmdFile(
+        "pnpm",
+        publishArgs,
         {
           successCallback: (stdout) => {
             consola.success(`Published ${packageName} ${newVersion}`);
