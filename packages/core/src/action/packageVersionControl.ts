@@ -1,15 +1,24 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
-import { type ReleaseType, inc } from "semver";
+import { type ReleaseType, inc, valid } from "semver";
 import { cmd } from "../utils/cmd";
 import type { ReleaseSchemaType } from "../validation/validation";
 
 export const packageVersionControl = ({
   level,
   pre,
+  version,
   packageJsonPath,
-}: Pick<ReleaseSchemaType, "level" | "pre"> & { packageJsonPath: string }) => {
-  let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+}: Pick<ReleaseSchemaType, "level" | "pre" | "version"> & {
+  packageJsonPath: string;
+}) => {
+  let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as Record<
+    string,
+    unknown
+  > & {
+    name?: string;
+    version?: string;
+  };
 
   const currentVersion = cmd(`npm show ${packageJson.name} version`, {
     execOptions: {
@@ -49,7 +58,43 @@ export const packageVersionControl = ({
       }
     }
   };
-  const newVersion = inc(currentVersion, getReleaseType(), "beta");
+
+  const resolveNewVersion = () => {
+    if (version) {
+      const nextVersion =
+        typeof version === "function"
+          ? version({
+              currentVersion,
+              packageJson: { ...packageJson },
+              level,
+              pre,
+              inc,
+            })
+          : version;
+
+      if (!valid(nextVersion)) {
+        throw new Error(`Invalid version: ${nextVersion}`);
+      }
+
+      return nextVersion;
+    }
+
+    if (!level) {
+      throw new Error(
+        "Release level is required when version is not configured",
+      );
+    }
+
+    const nextVersion = inc(currentVersion, getReleaseType(), "beta");
+
+    if (!nextVersion) {
+      throw new Error(`Failed to increment version from ${currentVersion}`);
+    }
+
+    return nextVersion;
+  };
+
+  const newVersion = resolveNewVersion();
 
   const versionUp = () => {
     packageJson.version = newVersion;

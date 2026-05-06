@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { cwd } from "node:process";
 
 export const findPackageJsonByName = async (
-  name: string
+  name: string,
 ): Promise<string | null> => {
   async function searchDirectory(directory: string): Promise<string | null> {
     const items = await readdir(directory, { withFileTypes: true });

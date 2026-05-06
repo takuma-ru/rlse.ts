@@ -45,6 +45,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "test": "node --test ./test/*.test.mjs",
     "lint": "biome lint --apply ./src",
     "format": "biome format --apply ./src",
     "check": "biome check --apply ./src",

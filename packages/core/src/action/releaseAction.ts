@@ -24,6 +24,7 @@ export const releaseAction = async (options: unknown) => {
     name,
     pre,
     level,
+    version,
     buildCmd,
     gitUserName,
     gitUserEmail,
@@ -79,6 +80,7 @@ export const releaseAction = async (options: unknown) => {
     packageVersionControl({
       level,
       pre,
+      version,
       packageJsonPath,
     });
 
@@ -150,7 +152,7 @@ export const releaseAction = async (options: unknown) => {
 
             return stdout;
           },
-        }
+        },
       );
     }
   } catch (error) {

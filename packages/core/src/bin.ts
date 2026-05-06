@@ -24,7 +24,7 @@ program
     (value, previous: string[]) => {
       return previous.concat([value]);
     },
-    undefined
+    undefined,
   )
   .option("--dry-run", "Dry run")
   .action(async (options) => {

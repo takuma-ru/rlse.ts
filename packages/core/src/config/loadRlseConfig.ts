@@ -92,7 +92,7 @@ const importTypeScriptConfig = async (filePath: string) => {
       },
       exclude: ["node_modules"],
       include: [filePath],
-    })
+    }),
   );
 
   try {

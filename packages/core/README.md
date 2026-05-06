@@ -66,6 +66,22 @@ export default defineConfig({
 });
 ```
 
+You can also generate the next version dynamically in `rlse.config.*`.
+
+```ts filename=rlse.config.ts
+import { defineConfig } from "@takuma-ru/rlse";
+
+export default defineConfig({
+  name: "vanilla-ts",
+  buildCmd: "pnpm build",
+  skipStep: ["commit-changes", "create-release-branch", "publish"],
+  version: ({ currentVersion, inc }) => inc(currentVersion, "prerelease", "beta")!,
+});
+```
+
+When `version` is specified, its return value is used as the release version.
+`level` becomes optional in that case.
+
 ### defineConfig Types
 
 ```ts
@@ -77,6 +93,19 @@ type RlseConfig = {
   dryRun?: boolean | undefined;
   gitUserName?: string | undefined;
   gitUserEmail?: string | undefined;
+  version?:
+    | string
+    | ((context: {
+        currentVersion: string;
+        packageJson: Record<string, unknown> & {
+          name?: string;
+          version?: string;
+        };
+        level?: "patch" | "minor" | "major" | "preup" | undefined;
+        pre: boolean;
+        inc: typeof import("semver").inc;
+      }) => string)
+    | undefined;
   skipStep?:
     | (
         | "config"
