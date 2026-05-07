@@ -61,26 +61,19 @@ export default defineConfig([
 
 Custom steps can be added with `(context) => { ... }`.
 
-CLI arguments can be declared in config and used when building the flow.
+CLI arguments can be declared with Zod in config and used when building the flow.
 
 ```ts filename=rlse.config.ts
-import { defineConfig, steps } from "@takuma-ru/rlse";
+import { defineConfig, steps, z } from "@takuma-ru/rlse";
 
 export default defineConfig({
-  args: {
-    level: {
-      type: "string",
-      short: "l",
-      description: "Release level",
-      default: "patch",
-      choices: ["patch", "minor", "major", "preup"],
-    },
-    pre: {
-      type: "boolean",
-      description: "Release as pre-release",
-      default: false,
-    },
-  },
+  args: z.object({
+    level: z
+      .enum(["patch", "minor", "major", "preup"])
+      .default("patch")
+      .describe("Release level"),
+    pre: z.boolean().default(false).describe("Release as pre-release"),
+  }),
   flow: ({ args }) => [
     steps.resolvePackage({ name: "vanilla-ts" }),
     steps.bumpVersion({
@@ -101,12 +94,11 @@ rlse --level minor --pre
 ### defineConfig Types
 
 ```ts
-type RlseConfig =
+type RlseConfig<TArgs extends z.AnyZodObject = z.AnyZodObject> =
   | RlseFlowStep[]
   | {
-      args: Record<string, RlseArgDefinition>;
-      flow: (context: { args: Record<string, string | boolean> }) =>
-        RlseFlowStep[];
+      args: TArgs;
+      flow: (context: { args: z.infer<TArgs> }) => RlseFlowStep[];
     };
 
 type RlseFlowStep =

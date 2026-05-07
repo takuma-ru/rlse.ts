@@ -26,5 +26,7 @@ const resolveFlow = (
     return config;
   }
 
-  return config.flow({ args });
+  return config.flow({
+    args: config.args.parse(args),
+  });
 };

@@ -1,9 +1,10 @@
 import { Command, Option } from "commander";
+import { z } from "zod";
 
 import packageJson from "../package.json";
 import { releaseAction } from "./action/releaseAction";
 import { loadRlseConfig } from "./config/loadRlseConfig";
-import type { RlseArgDefinition, RlseConfig } from "./types/RlseConfig";
+import type { RlseConfig } from "./types/RlseConfig";
 
 const program = new Command();
 
@@ -17,8 +18,10 @@ const main = async () => {
     .description("Release npm package")
     .version(thisPackageVersion);
 
-  for (const [name, definition] of Object.entries(getArgDefinitions(config))) {
-    program.addOption(createOption(name, definition));
+  const argSchemas = getArgSchemas(config);
+
+  for (const [name, schema] of Object.entries(argSchemas)) {
+    program.addOption(createOption(name, schema));
   }
 
   program.action(async (args) => {
@@ -28,40 +31,59 @@ const main = async () => {
   program.parse();
 };
 
-const getArgDefinitions = (config: RlseConfig) => {
+const getArgSchemas = (config: RlseConfig) => {
   if (Array.isArray(config)) {
     return {};
   }
 
-  return config.args;
+  return config.args.shape as Record<string, z.ZodTypeAny>;
 };
 
-const createOption = (name: string, definition: RlseArgDefinition) => {
+const createOption = (name: string, schema: z.ZodTypeAny) => {
+  const { defaultValue, schema: optionSchema } = unwrapSchema(schema);
   const option = new Option(
-    createFlags(name, definition),
-    definition.description,
+    createFlags(name, optionSchema),
+    schema.description,
   );
+  const choices = getChoices(optionSchema);
 
-  if (definition.type === "string" && definition.choices) {
-    option.choices([...definition.choices]);
+  if (choices) {
+    option.choices(choices);
   }
 
-  if (definition.default !== undefined) {
-    option.default(definition.default);
+  if (defaultValue !== undefined) {
+    option.default(defaultValue);
   }
 
   return option;
 };
 
-const createFlags = (name: string, definition: RlseArgDefinition) => {
-  const longName = toKebabCase(name);
-  const longFlag = `--${longName}${definition.type === "string" ? ` <${name}>` : ""}`;
+const unwrapSchema = (schema: z.ZodTypeAny) => {
+  let currentSchema = schema;
+  let defaultValue: unknown;
 
-  if (!definition.short) {
-    return longFlag;
+  while (currentSchema instanceof z.ZodDefault) {
+    defaultValue = currentSchema._def.defaultValue();
+    currentSchema = currentSchema._def.innerType;
   }
 
-  return `-${definition.short}, ${longFlag}`;
+  return {
+    defaultValue,
+    schema: currentSchema,
+  };
+};
+
+const getChoices = (schema: z.ZodTypeAny) => {
+  if (schema instanceof z.ZodEnum) {
+    return [...schema.options];
+  }
+
+  return undefined;
+};
+
+const createFlags = (name: string, schema: z.ZodTypeAny) => {
+  const longName = toKebabCase(name);
+  return `--${longName}${schema instanceof z.ZodBoolean ? "" : ` <${name}>`}`;
 };
 
 const toKebabCase = (value: string) => {

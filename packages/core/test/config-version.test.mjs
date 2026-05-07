@@ -99,18 +99,12 @@ test("uses config-defined cli args in flow", () => {
   try {
     writeFileSync(
       path.join(projectDir, "rlse.config.mjs"),
-      `import { defineConfig, steps } from "${publicApiPath}";
+      `import { defineConfig, steps, z } from "${publicApiPath}";
 
 export default defineConfig({
-  args: {
-    level: {
-      type: "string",
-      short: "l",
-      description: "Release level",
-      default: "patch",
-      choices: ["patch", "minor"],
-    },
-  },
+  args: z.object({
+    level: z.enum(["patch", "minor"]).default("patch").describe("Release level"),
+  }),
   flow: ({ args }) => [
     steps.resolvePackage({ name: "rlse-config-version-fixture" }),
     steps.bumpVersion({ level: args.level }),

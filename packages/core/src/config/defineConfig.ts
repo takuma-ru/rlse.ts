@@ -1,5 +1,5 @@
 import type {
-  RlseArgsDefinition,
+  RlseArgsSchema,
   RlseConfig,
   RlseConfigWithArgs,
 } from "../types/RlseConfig";
@@ -7,7 +7,7 @@ import type {
 export function defineConfig<const TFlow extends RlseConfig>(
   config: TFlow,
 ): TFlow;
-export function defineConfig<const TArgs extends RlseArgsDefinition>(
+export function defineConfig<const TArgs extends RlseArgsSchema>(
   config: RlseConfigWithArgs<TArgs>,
 ): RlseConfigWithArgs<TArgs>;
 export function defineConfig(config: RlseConfig) {

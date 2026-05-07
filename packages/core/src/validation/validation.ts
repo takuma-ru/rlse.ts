@@ -20,26 +20,12 @@ export const flowSchema = z.array(flowStepSchema).min(1, {
   message: "Release flow must include at least one step",
 });
 
-const argDefinitionSchema = z.union([
-  z.object({
-    type: z.literal("string"),
-    short: z.string().optional(),
-    description: z.string().optional(),
-    default: z.string().optional(),
-    choices: z.array(z.string()).optional(),
-  }),
-  z.object({
-    type: z.literal("boolean"),
-    short: z.string().optional(),
-    description: z.string().optional(),
-    default: z.boolean().optional(),
-  }),
-]);
-
 export const releaseSchema = z.union([
   flowSchema,
   z.object({
-    args: z.record(argDefinitionSchema),
+    args: z.custom<z.AnyZodObject>((value) => value instanceof z.ZodObject, {
+      message: "Invalid args schema",
+    }),
     flow: z.custom<
       (context: { args: Record<string, string | boolean> }) => RlseFlowStep[]
     >((value) => typeof value === "function", {
