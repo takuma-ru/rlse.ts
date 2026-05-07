@@ -1,17 +1,22 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
 import { type ReleaseType, inc, valid } from "semver";
+import type { ReleaseLevel, VersionResolver } from "../types/RlseConfig";
 import { cmd } from "../utils/cmd";
-import type { ReleaseSchemaType } from "../validation/validation";
+
+type PackageVersionControlOptions = {
+  level?: ReleaseLevel;
+  pre: boolean;
+  version?: string | VersionResolver;
+  packageJsonPath: string;
+};
 
 export const packageVersionControl = ({
   level,
   pre,
   version,
   packageJsonPath,
-}: Pick<ReleaseSchemaType, "level" | "pre" | "version"> & {
-  packageJsonPath: string;
-}) => {
+}: PackageVersionControlOptions) => {
   let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as Record<
     string,
     unknown

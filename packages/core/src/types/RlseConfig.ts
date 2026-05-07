@@ -1,11 +1,6 @@
-export type ReleaseLevel = "patch" | "minor" | "major" | "preup";
+import type { RlseFlowStep } from "../flow/types";
 
-export type SkipStep =
-  | "config"
-  | "create-release-branch"
-  | "build"
-  | "commit-changes"
-  | "publish";
+export type ReleaseLevel = "patch" | "minor" | "major" | "preup";
 
 export type VersionResolverContext = {
   currentVersion: string;
@@ -20,14 +15,4 @@ export type VersionResolverContext = {
 
 export type VersionResolver = (context: VersionResolverContext) => string;
 
-export type RlseConfig = {
-  name?: string;
-  pre?: boolean;
-  level?: ReleaseLevel;
-  buildCmd?: string;
-  gitUserName?: string;
-  gitUserEmail?: string;
-  skipStep?: SkipStep[];
-  dryRun?: boolean;
-  version?: string | VersionResolver;
-};
+export type RlseConfig = RlseFlowStep[];
