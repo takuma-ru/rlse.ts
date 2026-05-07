@@ -61,10 +61,53 @@ export default defineConfig([
 
 Custom steps can be added with `(context) => { ... }`.
 
+CLI arguments can be declared in config and used when building the flow.
+
+```ts filename=rlse.config.ts
+import { defineConfig, steps } from "@takuma-ru/rlse";
+
+export default defineConfig({
+  args: {
+    level: {
+      type: "string",
+      short: "l",
+      description: "Release level",
+      default: "patch",
+      choices: ["patch", "minor", "major", "preup"],
+    },
+    pre: {
+      type: "boolean",
+      description: "Release as pre-release",
+      default: false,
+    },
+  },
+  flow: ({ args }) => [
+    steps.resolvePackage({ name: "vanilla-ts" }),
+    steps.bumpVersion({
+      level: args.level,
+      pre: args.pre,
+    }),
+    steps.run("pnpm build"),
+    steps.commitChanges(),
+    steps.publish(),
+  ],
+});
+```
+
+```shell
+rlse --level minor --pre
+```
+
 ### defineConfig Types
 
 ```ts
-type RlseConfig = RlseFlowStep[];
+type RlseConfig =
+  | RlseFlowStep[]
+  | {
+      args: Record<string, RlseArgDefinition>;
+      flow: (context: { args: Record<string, string | boolean> }) =>
+        RlseFlowStep[];
+    };
 
 type RlseFlowStep =
   | {

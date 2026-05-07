@@ -92,3 +92,43 @@ export default defineConfig([
     rmSync(projectDir, { recursive: true, force: true });
   }
 });
+
+test("uses config-defined cli args in flow", () => {
+  const projectDir = createTempProject();
+
+  try {
+    writeFileSync(
+      path.join(projectDir, "rlse.config.mjs"),
+      `import { defineConfig, steps } from "${publicApiPath}";
+
+export default defineConfig({
+  args: {
+    level: {
+      type: "string",
+      short: "l",
+      description: "Release level",
+      default: "patch",
+      choices: ["patch", "minor"],
+    },
+  },
+  flow: ({ args }) => [
+    steps.resolvePackage({ name: "rlse-config-version-fixture" }),
+    steps.bumpVersion({ level: args.level }),
+  ],
+});\n`,
+    );
+
+    execFileSync("node", [cliPath, "--level", "minor"], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+
+    const packageJson = JSON.parse(
+      readFileSync(path.join(projectDir, "package.json"), "utf8"),
+    );
+
+    assert.equal(packageJson.version, "1.3.0");
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
