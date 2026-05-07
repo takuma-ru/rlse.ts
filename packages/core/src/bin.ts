@@ -25,7 +25,7 @@ const main = async () => {
   }
 
   program.action(async (args) => {
-    releaseAction(config, args);
+    await releaseAction(config, args);
   });
 
   program.parse();
@@ -41,6 +41,7 @@ const getArgSchemas = (config: RlseConfig) => {
 
 const createOption = (name: string, schema: z.ZodTypeAny) => {
   const { defaultValue, schema: optionSchema } = unwrapSchema(schema);
+  assertSupportedArgSchema(name, optionSchema);
   const option = new Option(
     createFlags(name, optionSchema),
     schema.description,
@@ -62,8 +63,16 @@ const unwrapSchema = (schema: z.ZodTypeAny) => {
   let currentSchema = schema;
   let defaultValue: unknown;
 
-  while (currentSchema instanceof z.ZodDefault) {
-    defaultValue = currentSchema._def.defaultValue();
+  while (
+    currentSchema instanceof z.ZodDefault ||
+    currentSchema instanceof z.ZodOptional
+  ) {
+    if (currentSchema instanceof z.ZodDefault) {
+      defaultValue = currentSchema._def.defaultValue();
+      currentSchema = currentSchema._def.innerType;
+      continue;
+    }
+
     currentSchema = currentSchema._def.innerType;
   }
 
@@ -71,6 +80,20 @@ const unwrapSchema = (schema: z.ZodTypeAny) => {
     defaultValue,
     schema: currentSchema,
   };
+};
+
+const assertSupportedArgSchema = (name: string, schema: z.ZodTypeAny) => {
+  if (
+    schema instanceof z.ZodString ||
+    schema instanceof z.ZodEnum ||
+    schema instanceof z.ZodBoolean
+  ) {
+    return;
+  }
+
+  throw new Error(
+    `Unsupported CLI argument schema for ${name}. Use z.string(), z.enum(), or z.boolean().`,
+  );
 };
 
 const getChoices = (schema: z.ZodTypeAny) => {

@@ -7,10 +7,9 @@ export const releaseAction = async (
   options: unknown,
   args: Record<string, string | boolean> = {},
 ) => {
-  const config = parseReleaseSchema(options);
-  const flow = resolveFlow(config, args);
-
   try {
+    const config = parseReleaseSchema(options);
+    const flow = resolveFlow(config, args);
     await runFlow(parseFlowSchema(flow));
   } catch (error) {
     consola.error(error);

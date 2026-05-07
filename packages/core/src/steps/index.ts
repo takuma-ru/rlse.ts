@@ -19,10 +19,10 @@ export const configureGit = (options?: {
   name: "configureGit",
   run: () => {
     if (options?.name) {
-      cmd(`git config --local user.name ${options.name}`);
+      cmd(`git config --local user.name ${shellQuote(options.name)}`);
     }
     if (options?.email) {
-      cmd(`git config --local user.email ${options.email}`);
+      cmd(`git config --local user.email ${shellQuote(options.email)}`);
     }
   },
 });
@@ -100,13 +100,13 @@ export const createReleaseBranch = (options?: {
     context.baseBranch = baseBranch;
     context.releaseBranch = releaseBranch;
 
-    cmd(`git switch -c ${releaseBranch}`, {
+    cmd(`git switch -c ${shellQuote(releaseBranch)}`, {
       successCallback: (stdout) => {
         consola.success(`Switched to ${releaseBranch}`);
         return stdout;
       },
     });
-    cmd(`git push --set-upstream origin ${releaseBranch}`, {
+    cmd(`git push --set-upstream origin ${shellQuote(releaseBranch)}`, {
       successCallback: (stdout) => {
         consola.success(`Pushed to ${releaseBranch}`);
         return stdout;
@@ -118,9 +118,9 @@ export const createReleaseBranch = (options?: {
       return;
     }
 
-    cmd(`git switch ${context.baseBranch}`);
-    cmd(`git branch -D ${context.releaseBranch}`);
-    cmd(`git push origin --delete ${context.releaseBranch}`);
+    cmd(`git switch ${shellQuote(context.baseBranch)}`);
+    cmd(`git branch -D ${shellQuote(context.releaseBranch)}`);
+    cmd(`git push origin --delete ${shellQuote(context.releaseBranch)}`);
   },
 });
 
@@ -161,13 +161,16 @@ export const commitChanges = (options?: {
         : options?.message ??
           `Release ${context.packageName} ${context.newVersion}`;
 
-    cmd(`git add ${context.packageJsonPath}`, {
+    const targetBranch =
+      context.releaseBranch ?? context.baseBranch ?? getCurrentBranch();
+
+    cmd(`git add ${shellQuote(context.packageJsonPath)}`, {
       successCallback: (stdout) => {
         consola.success(`Added ${context.packageJsonPath}`);
         return stdout;
       },
     });
-    cmd(`git commit -m "${message}"`, {
+    cmd(`git commit -m ${shellQuote(message)}`, {
       successCallback: (stdout) => {
         consola.success(
           `Committed ${context.packageName} ${context.newVersion}`,
@@ -175,7 +178,7 @@ export const commitChanges = (options?: {
         return stdout;
       },
     });
-    cmd(`git push origin ${context.releaseBranch ?? context.baseBranch}`, {
+    cmd(`git push origin ${shellQuote(targetBranch)}`, {
       successCallback: (stdout) => {
         consola.success(`Pushed ${context.packageName} ${context.newVersion}`);
         return stdout;
@@ -194,7 +197,7 @@ export const publish = (options?: { dryRun?: boolean }): RlseStep => ({
     const dryRun = options?.dryRun ?? context.dryRun;
 
     cmd(
-      `pnpm publish --filter ${context.packageName} --no-git-checks ${
+      `pnpm publish --filter ${shellQuote(context.packageName)} --no-git-checks ${
         dryRun ? "--dry-run" : ""
       }`,
       {
@@ -208,3 +211,17 @@ export const publish = (options?: { dryRun?: boolean }): RlseStep => ({
     );
   },
 });
+
+const getCurrentBranch = () => {
+  return cmd("git branch --show-current", {
+    execOptions: {
+      stdio: "pipe",
+      encoding: "utf8",
+    },
+    successCallback: (stdout) => stdout.trim(),
+  });
+};
+
+const shellQuote = (value: string) => {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+};

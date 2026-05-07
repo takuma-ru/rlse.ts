@@ -55,7 +55,7 @@ export default defineConfig([
   steps.createReleaseBranch(),
   steps.run("pnpm build"),
   steps.commitChanges(),
-  steps.publish({ dryRun: true }),
+  steps.publish(),
 ]);
 ```
 
