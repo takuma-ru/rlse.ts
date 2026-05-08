@@ -6,10 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxlint --config ../oxlint.config.ts .",
-    "lint:fix": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxlint --config ../oxlint.config.ts --fix .",
-    "format": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxfmt --config ../oxfmt.config.ts .",
-    "format:check": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxfmt --config ../oxfmt.config.ts --check .",
+    "lint": "pnpm exec oxlint --config ../oxlint.config.ts .",
+    "lint:fix": "pnpm exec oxlint --config ../oxlint.config.ts --fix .",
+    "format": "pnpm exec oxfmt --config ../oxfmt.config.ts .",
+    "format:check": "pnpm exec oxfmt --config ../oxfmt.config.ts --check .",
     "check": "pnpm run format:check && pnpm run lint",
     "preview": "vite preview"
   },

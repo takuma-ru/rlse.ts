@@ -10,10 +10,10 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "lint": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxlint --config ./oxlint.config.ts .",
-    "lint:fix": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxlint --config ./oxlint.config.ts --fix .",
-    "fmt": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxfmt --config ./oxfmt.config.ts .",
-    "fmt:check": "NODE_OPTIONS=--experimental-strip-types pnpm exec oxfmt --config ./oxfmt.config.ts --check .",
+    "lint": "pnpm exec oxlint --config ./oxlint.config.ts .",
+    "lint:fix": "pnpm exec oxlint --config ./oxlint.config.ts --fix .",
+    "fmt": "pnpm exec oxfmt --config ./oxfmt.config.ts .",
+    "fmt:check": "pnpm exec oxfmt --config ./oxfmt.config.ts --check .",
     "check": "pnpm run fmt:check && pnpm run lint",
     "p:core": "pnpm -C packages/core",
     "pg:vanilla-ts": "pnpm -C playgrounds/vanilla-ts",
@@ -31,7 +31,7 @@
     "yarn": "please_use_pnpm_instead"
   },
   "volta": {
-    "node": "22.12.0",
+    "node": "24.11.1",
     "pnpm": "9.5.0"
   },
   "packageManager": "pnpm@9.5.0"
