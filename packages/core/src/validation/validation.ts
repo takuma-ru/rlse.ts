@@ -10,7 +10,9 @@ const flowStepSchema = z.custom<RlseFlowStep>(
       value !== null &&
       "name" in value &&
       "run" in value &&
-      typeof value.run === "function"),
+      typeof value.name === "string" &&
+      typeof value.run === "function" &&
+      (!("rollback" in value) || typeof value.rollback === "function")),
   {
     message: "Invalid flow step",
   },

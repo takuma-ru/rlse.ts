@@ -5,13 +5,14 @@ import packageJson from "../package.json";
 import { releaseAction } from "./action/releaseAction";
 import { loadRlseConfig } from "./config/loadRlseConfig";
 import type { RlseConfig } from "./types/RlseConfig";
+import { parseReleaseSchema } from "./validation/validation";
 
 const program = new Command();
 
 const thisPackageVersion = packageJson.version as string;
 
 const main = async () => {
-  const config = await loadRlseConfig();
+  const config = parseReleaseSchema(await loadRlseConfig());
 
   program
     .name("rlse")
