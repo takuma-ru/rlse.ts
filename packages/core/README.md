@@ -66,12 +66,16 @@ export default defineConfig([
   steps.calculateNextVersion({ level: "patch" }),
   steps.writePackageVersion(),
   steps.run("pnpm build"),
-  steps.publish(),
   steps.stageFiles(),
   steps.commit(),
+  steps.publish(),
   steps.push(),
 ]);
 ```
+
+The default npm preset commits before publishing and pushes after publishing. If
+`publish` succeeds but `push` fails, rerun after fixing git access or push the
+created commit manually.
 
 Custom steps can be added with `(context) => { ... }`.
 

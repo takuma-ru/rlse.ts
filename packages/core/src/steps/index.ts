@@ -92,17 +92,12 @@ export const calculateNextVersion = (
       context.currentVersion ?? context.packageJson.version ?? "0.0.0";
     const pre = options.pre ?? false;
 
-    const nextVersion =
-      typeof options.version === "function"
-        ? options.version({
-            currentVersion,
-            packageJson: { ...context.packageJson },
-            level: options.level,
-            pre,
-            inc,
-          })
-        : (options.version ??
-          inc(currentVersion, getReleaseType(options.level, pre), "beta"));
+    const nextVersion = resolveNextVersion({
+      currentVersion,
+      packageJson: context.packageJson,
+      options,
+      pre,
+    });
 
     if (!nextVersion || !valid(nextVersion)) {
       throw new Error(`Invalid version: ${nextVersion}`);
@@ -332,6 +327,8 @@ export const commitChanges = (options?: {
         ? options.message(context)
         : (options?.message ??
           `Release ${context.packageName} ${context.newVersion}`);
+    const targetBranch =
+      context.releaseBranch ?? context.baseBranch ?? getCurrentBranch();
 
     cmdFile("git", ["add", context.packageJsonPath], {
       successCallback: (stdout) => {
@@ -351,6 +348,12 @@ export const commitChanges = (options?: {
         consola.success(
           `Committed ${context.packageName} ${context.newVersion}`,
         );
+        return stdout;
+      },
+    });
+    cmdFile("git", ["push", "origin", targetBranch], {
+      successCallback: (stdout) => {
+        consola.success(`Pushed ${context.packageName} ${context.newVersion}`);
         return stdout;
       },
     });
@@ -418,6 +421,43 @@ const writePackageJson = (
   writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 };
 
+const resolveNextVersion = ({
+  currentVersion,
+  packageJson,
+  options,
+  pre,
+}: {
+  currentVersion: string;
+  packageJson: PackageJson;
+  options: VersionOptions;
+  pre: boolean;
+}) => {
+  if (typeof options.version === "function") {
+    return options.version({
+      currentVersion,
+      packageJson: { ...packageJson },
+      level: options.level,
+      pre,
+      inc,
+    });
+  }
+
+  if (options.version) {
+    return options.version;
+  }
+
+  const nextVersion = inc(
+    currentVersion,
+    getReleaseType(options.level, pre),
+    "beta",
+  );
+  if (!nextVersion) {
+    throw new Error(`Failed to increment version from ${currentVersion}`);
+  }
+
+  return nextVersion;
+};
+
 const getReleaseType = (level?: ReleaseLevel, pre = false): ReleaseType => {
   switch (level) {
     case "patch": {
@@ -435,7 +475,9 @@ const getReleaseType = (level?: ReleaseLevel, pre = false): ReleaseType => {
     case "preup": {
       return "prerelease";
     }
-    case "fix":
+    case "fix": {
+      throw new Error("Version is required for fix level");
+    }
     case undefined: {
       throw new Error(
         "Release level is required when version is not configured",
