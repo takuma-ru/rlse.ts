@@ -25,9 +25,17 @@ export const flowSchema = z.array(flowStepSchema).min(1, {
 export const releaseSchema = z.union([
   flowSchema,
   z.object({
-    args: z.custom<z.AnyZodObject>((value) => value instanceof z.ZodObject, {
-      message: "Invalid args schema",
-    }),
+    args: z.custom<z.AnyZodObject>(
+      (value) =>
+        typeof value === "object" &&
+        value !== null &&
+        "shape" in value &&
+        "parse" in value &&
+        typeof value.parse === "function",
+      {
+        message: "Invalid args schema",
+      },
+    ),
     flow: z.custom<
       (context: { args: Record<string, string | boolean> }) => RlseFlowStep[]
     >((value) => typeof value === "function", {

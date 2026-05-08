@@ -64,11 +64,8 @@ const unwrapSchema = (schema: z.ZodTypeAny) => {
   let currentSchema = schema;
   let defaultValue: unknown;
 
-  while (
-    currentSchema instanceof z.ZodDefault ||
-    currentSchema instanceof z.ZodOptional
-  ) {
-    if (currentSchema instanceof z.ZodDefault) {
+  while (isZodDefault(currentSchema) || isZodOptional(currentSchema)) {
+    if (isZodDefault(currentSchema)) {
       defaultValue = currentSchema._def.defaultValue();
       currentSchema = currentSchema._def.innerType;
       continue;
@@ -84,11 +81,7 @@ const unwrapSchema = (schema: z.ZodTypeAny) => {
 };
 
 const assertSupportedArgSchema = (name: string, schema: z.ZodTypeAny) => {
-  if (
-    schema instanceof z.ZodString ||
-    schema instanceof z.ZodEnum ||
-    schema instanceof z.ZodBoolean
-  ) {
+  if (isZodString(schema) || isZodEnum(schema) || isZodBoolean(schema)) {
     return;
   }
 
@@ -98,8 +91,8 @@ const assertSupportedArgSchema = (name: string, schema: z.ZodTypeAny) => {
 };
 
 const getChoices = (schema: z.ZodTypeAny) => {
-  if (schema instanceof z.ZodEnum) {
-    return [...schema.options];
+  if (isZodEnum(schema)) {
+    return [...(schema._def.values as string[])];
   }
 
   return undefined;
@@ -107,8 +100,24 @@ const getChoices = (schema: z.ZodTypeAny) => {
 
 const createFlags = (name: string, schema: z.ZodTypeAny) => {
   const longName = toKebabCase(name);
-  return `--${longName}${schema instanceof z.ZodBoolean ? "" : ` <${name}>`}`;
+  return `--${longName}${isZodBoolean(schema) ? "" : ` <${name}>`}`;
 };
+
+const getTypeName = (schema: z.ZodTypeAny) => schema._def.typeName as string;
+
+const isZodDefault = (schema: z.ZodTypeAny) =>
+  getTypeName(schema) === "ZodDefault";
+
+const isZodOptional = (schema: z.ZodTypeAny) =>
+  getTypeName(schema) === "ZodOptional";
+
+const isZodString = (schema: z.ZodTypeAny) =>
+  getTypeName(schema) === "ZodString";
+
+const isZodEnum = (schema: z.ZodTypeAny) => getTypeName(schema) === "ZodEnum";
+
+const isZodBoolean = (schema: z.ZodTypeAny) =>
+  getTypeName(schema) === "ZodBoolean";
 
 const toKebabCase = (value: string) => {
   return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);

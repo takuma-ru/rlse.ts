@@ -71,7 +71,9 @@ const importTypeScriptConfig = async (filePath: string) => {
       compilerOptions: {
         target: "ESNext",
         useDefineForClassFields: true,
-        module: "esnext",
+        module: "commonjs",
+        moduleResolution: "node",
+        esModuleInterop: true,
         lib: ["ESNext"],
         skipLibCheck: true,
         noErrorTruncation: true,
@@ -94,6 +96,10 @@ const importTypeScriptConfig = async (filePath: string) => {
       include: [filePath],
     }),
   );
+  writeFileSync(
+    resolve(tempDir, "package.json"),
+    JSON.stringify({ type: "commonjs" }),
+  );
 
   try {
     execSync(`tsc --project ${customTsConfigPath}`, {
@@ -101,7 +107,7 @@ const importTypeScriptConfig = async (filePath: string) => {
     });
     const config = await import(tempFilePath);
 
-    return config.default as RlseConfig;
+    return (config.default.default ?? config.default) as RlseConfig;
   } catch (error) {
     consola.error("Error compiling TypeScript file:", error);
 
