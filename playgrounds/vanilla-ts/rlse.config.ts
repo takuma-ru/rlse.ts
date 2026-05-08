@@ -1,4 +1,4 @@
-import { defineConfig, steps, z } from "@takuma-ru/rlse";
+import { defineConfig, presets, z } from "@takuma-ru/rlse";
 
 export default defineConfig({
   args: z.object({
@@ -7,10 +7,13 @@ export default defineConfig({
       .default("patch")
       .describe("Release level"),
   }),
-  flow: ({ args }) => [
-    steps.resolvePackage({ name: "vanilla-ts" }),
-    steps.bumpVersion({ level: args.level }),
-    steps.run("pnpm build"),
-    steps.publish({ dryRun: true }),
-  ],
+  flow: ({ args }) =>
+    presets.npmRelease({
+      resolvePackage: { name: "vanilla-ts" },
+      calculateNextVersion: { level: args.level },
+      run: "pnpm build",
+      publish: { dryRun: true },
+      commit: false,
+      push: false,
+    }),
 });

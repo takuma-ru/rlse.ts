@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
+import { type ReleaseType, inc, valid } from "semver";
 import { findPackageJsonByName } from "../action/findPackageJsonByName";
 import { packageVersionControl } from "../action/packageVersionControl";
 import type { RlseStep } from "../flow/types";
@@ -10,6 +11,11 @@ type VersionOptions = {
   level?: ReleaseLevel;
   pre?: boolean;
   version?: string | VersionResolver;
+};
+
+type PackageJson = Record<string, unknown> & {
+  name?: string;
+  version?: string;
 };
 
 export const configureGit = (options?: {
@@ -36,13 +42,105 @@ export const resolvePackage = (options: { name: string }): RlseStep => ({
       throw new Error(`package.json for ${options.name} not found`);
     }
 
-    const packageJson = JSON.parse(
-      readFileSync(packageJsonPath, "utf8"),
-    ) as NonNullable<typeof context.packageJson>;
+    const packageJson = readPackageJson(packageJsonPath);
 
     context.packageJsonPath = packageJsonPath;
     context.packageJson = packageJson;
     context.packageName = packageJson.name;
+  },
+});
+
+export const resolvePublishedVersion = (): RlseStep => ({
+  name: "resolvePublishedVersion",
+  run: (context) => {
+    if (!context.packageJsonPath || !context.packageName) {
+      throw new Error(
+        "Package must be resolved before resolvePublishedVersion",
+      );
+    }
+
+    context.currentVersion = cmdFile(
+      "npm",
+      ["show", context.packageName, "version"],
+      {
+        execOptions: {
+          stdio: "pipe",
+          encoding: "utf8",
+        },
+        successCallback: (stdout) => stdout.trim(),
+        errorCallback: (error) => {
+          consola.error(error.message);
+          return context.packageJson?.version ?? "0.0.0";
+        },
+      },
+    );
+
+    consola.info(`Current version: ${context.currentVersion}`);
+  },
+});
+
+export const calculateNextVersion = (
+  options: VersionOptions = {},
+): RlseStep => ({
+  name: "calculateNextVersion",
+  run: (context) => {
+    if (!context.packageJson) {
+      throw new Error("Package must be resolved before calculateNextVersion");
+    }
+
+    const currentVersion =
+      context.currentVersion ?? context.packageJson.version ?? "0.0.0";
+    const pre = options.pre ?? false;
+
+    const nextVersion =
+      typeof options.version === "function"
+        ? options.version({
+            currentVersion,
+            packageJson: { ...context.packageJson },
+            level: options.level,
+            pre,
+            inc,
+          })
+        : (options.version ??
+          inc(currentVersion, getReleaseType(options.level, pre), "beta"));
+
+    if (!nextVersion || !valid(nextVersion)) {
+      throw new Error(`Invalid version: ${nextVersion}`);
+    }
+
+    context.currentVersion = currentVersion;
+    context.newVersion = nextVersion;
+  },
+});
+
+export const writePackageVersion = (): RlseStep => ({
+  name: "writePackageVersion",
+  run: (context) => {
+    if (!context.packageJsonPath || !context.newVersion) {
+      throw new Error(
+        "Next version must be calculated before writePackageVersion",
+      );
+    }
+
+    const packageJson = readPackageJson(context.packageJsonPath);
+    const previousVersion = packageJson.version;
+
+    packageJson.version = context.newVersion;
+    writePackageJson(context.packageJsonPath, packageJson);
+
+    context.packageJson = readPackageJson(context.packageJsonPath);
+    context.versionReset = () => {
+      const currentPackageJson = readPackageJson(context.packageJsonPath!);
+      currentPackageJson.version = previousVersion;
+      writePackageJson(context.packageJsonPath!, currentPackageJson);
+      context.packageJson = readPackageJson(context.packageJsonPath!);
+      consola.info(`Reset version: ${previousVersion}`);
+    };
+
+    consola.info(`New version: ${context.packageJson.version}`);
+  },
+  rollback: (context) => {
+    context.versionReset?.();
   },
 });
 
@@ -140,6 +238,80 @@ export const run = (command: string): RlseStep => ({
   },
 });
 
+export const stageFiles = (options?: { paths?: string[] }): RlseStep => ({
+  name: "stageFiles",
+  run: (context) => {
+    const paths =
+      options?.paths ??
+      (context.packageJsonPath ? [context.packageJsonPath] : undefined);
+
+    if (!paths?.length) {
+      throw new Error("Files must be provided before stageFiles");
+    }
+
+    cmdFile("git", ["add", ...paths], {
+      successCallback: (stdout) => {
+        consola.success(`Added ${paths.join(", ")}`);
+        return stdout;
+      },
+    });
+  },
+});
+
+export const commit = (options?: {
+  message?: string | ((context: Parameters<RlseStep["run"]>[0]) => string);
+}): RlseStep => ({
+  name: "commit",
+  run: (context) => {
+    const stagedFiles = getStagedFiles();
+    if (!stagedFiles) {
+      consola.info("No changes to commit");
+      return;
+    }
+
+    const message =
+      typeof options?.message === "function"
+        ? options.message(context)
+        : (options?.message ??
+          `Release ${context.packageName} ${context.newVersion}`);
+
+    cmdFile("git", ["commit", "-m", message], {
+      successCallback: (stdout) => {
+        consola.success(
+          `Committed ${context.packageName} ${context.newVersion}`,
+        );
+        return stdout;
+      },
+    });
+  },
+});
+
+export const push = (options?: {
+  branch?: string | ((context: Parameters<RlseStep["run"]>[0]) => string);
+  setUpstream?: boolean;
+}): RlseStep => ({
+  name: "push",
+  run: (context) => {
+    const targetBranch =
+      typeof options?.branch === "function"
+        ? options.branch(context)
+        : (options?.branch ??
+          context.releaseBranch ??
+          context.baseBranch ??
+          getCurrentBranch());
+    const args = options?.setUpstream
+      ? ["push", "--set-upstream", "origin", targetBranch]
+      : ["push", "origin", targetBranch];
+
+    cmdFile("git", args, {
+      successCallback: (stdout) => {
+        consola.success(`Pushed to ${targetBranch}`);
+        return stdout;
+      },
+    });
+  },
+});
+
 export const commitChanges = (options?: {
   message?: string | ((context: Parameters<RlseStep["run"]>[0]) => string);
 }): RlseStep => ({
@@ -161,9 +333,6 @@ export const commitChanges = (options?: {
         : (options?.message ??
           `Release ${context.packageName} ${context.newVersion}`);
 
-    const targetBranch =
-      context.releaseBranch ?? context.baseBranch ?? getCurrentBranch();
-
     cmdFile("git", ["add", context.packageJsonPath], {
       successCallback: (stdout) => {
         consola.success(`Added ${context.packageJsonPath}`);
@@ -171,13 +340,7 @@ export const commitChanges = (options?: {
       },
     });
 
-    const stagedFiles = cmdFile("git", ["diff", "--cached", "--name-only"], {
-      execOptions: {
-        stdio: "pipe",
-        encoding: "utf8",
-      },
-      successCallback: (stdout) => stdout.trim(),
-    });
+    const stagedFiles = getStagedFiles();
     if (!stagedFiles) {
       consola.info("No changes to commit");
       return;
@@ -188,12 +351,6 @@ export const commitChanges = (options?: {
         consola.success(
           `Committed ${context.packageName} ${context.newVersion}`,
         );
-        return stdout;
-      },
-    });
-    cmdFile("git", ["push", "origin", targetBranch], {
-      successCallback: (stdout) => {
-        consola.success(`Pushed ${context.packageName} ${context.newVersion}`);
         return stdout;
       },
     });
@@ -238,4 +395,51 @@ const getCurrentBranch = () => {
     },
     successCallback: (stdout) => stdout.trim(),
   });
+};
+
+const getStagedFiles = () => {
+  return cmdFile("git", ["diff", "--cached", "--name-only"], {
+    execOptions: {
+      stdio: "pipe",
+      encoding: "utf8",
+    },
+    successCallback: (stdout) => stdout.trim(),
+  });
+};
+
+const readPackageJson = (packageJsonPath: string) => {
+  return JSON.parse(readFileSync(packageJsonPath, "utf8")) as PackageJson;
+};
+
+const writePackageJson = (
+  packageJsonPath: string,
+  packageJson: PackageJson,
+) => {
+  writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+};
+
+const getReleaseType = (level?: ReleaseLevel, pre = false): ReleaseType => {
+  switch (level) {
+    case "patch": {
+      if (pre) return "prepatch";
+      return "patch";
+    }
+    case "minor": {
+      if (pre) return "preminor";
+      return "minor";
+    }
+    case "major": {
+      if (pre) return "premajor";
+      return "major";
+    }
+    case "preup": {
+      return "prerelease";
+    }
+    case "fix":
+    case undefined: {
+      throw new Error(
+        "Release level is required when version is not configured",
+      );
+    }
+  }
 };
