@@ -1,50 +1,53 @@
 import consola from "consola";
 import { z } from "zod";
+import type { RlseFlowStep } from "../flow/types";
+import type { RlseConfig } from "../types/RlseConfig";
 
-export const releaseSchema = z.object({
-  name: z.string().min(1, {
-    message: "Invalid package name",
-  }),
-  pre: z.boolean().optional().default(false),
-  level: z.union(
-    [
-      z.literal("patch"),
-      z.literal("minor"),
-      z.literal("major"),
-      z.literal("preup"),
-      z.literal("fix"),
-    ],
-    {
-      message: "Invalid release level",
-    },
-  ),
-  releaseVersion: z.string().optional(),
-  buildCmd: z.string().min(1, {
-    message: "Invalid build command",
-  }),
-  gitUserName: z.string().optional(),
-  gitUserEmail: z.string().optional(),
-  skipStep: z
-    .array(
-      z.union(
-        [
-          z.literal("config"),
-          z.literal("create-release-branch"),
-          z.literal("build"),
-          z.literal("commit-changes"),
-          z.literal("publish"),
-        ],
-        {
-          message: "Invalid step name",
-        },
-      ),
-    )
-    .optional(),
-  dryRun: z.boolean().optional().default(false),
+const flowStepSchema = z.custom<RlseFlowStep>(
+  (value) =>
+    typeof value === "function" ||
+    (typeof value === "object" &&
+      value !== null &&
+      "name" in value &&
+      "run" in value &&
+      typeof value.name === "string" &&
+      typeof value.run === "function" &&
+      (!("rollback" in value) || typeof value.rollback === "function")),
+  {
+    message: "Invalid flow step",
+  },
+);
+
+export const flowSchema = z.array(flowStepSchema).min(1, {
+  message: "Release flow must include at least one step",
 });
 
-export const parseReleaseSchema = (options: unknown): ReleaseSchemaType => {
+export const releaseSchema = z.union([
+  flowSchema,
+  z.object({
+    args: z.custom<z.AnyZodObject>((value) => value instanceof z.ZodObject, {
+      message: "Invalid args schema",
+    }),
+    flow: z.custom<
+      (context: { args: Record<string, string | boolean> }) => RlseFlowStep[]
+    >((value) => typeof value === "function", {
+      message: "Invalid flow factory",
+    }),
+  }),
+]);
+
+export const parseReleaseSchema = (options: unknown) => {
   const { data, error } = releaseSchema.safeParse(options);
+  if (error) {
+    consola.error(error.errors.map((e) => e.message).join("\n"));
+    process.exit(1);
+  }
+
+  return data as RlseConfig;
+};
+
+export const parseFlowSchema = (options: unknown) => {
+  const { data, error } = flowSchema.safeParse(options);
   if (error) {
     consola.error(error.errors.map((e) => e.message).join("\n"));
     process.exit(1);

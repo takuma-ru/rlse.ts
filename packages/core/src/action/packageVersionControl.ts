@@ -1,72 +1,113 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
-import { inc, type ReleaseType } from "semver";
+import { type ReleaseType, inc, valid } from "semver";
+import type { ReleaseLevel, VersionResolver } from "../types/RlseConfig";
 import { cmdFile } from "../utils/cmd";
-import type { ReleaseSchemaType } from "../validation/validation";
+
+type PackageVersionControlOptions = {
+  level?: ReleaseLevel;
+  pre: boolean;
+  version?: string | VersionResolver;
+  packageJsonPath: string;
+};
 
 export const packageVersionControl = ({
   level,
   pre,
-  releaseVersion,
+  version,
   packageJsonPath,
-}: Pick<ReleaseSchemaType, "level" | "pre" | "releaseVersion"> & {
-  packageJsonPath: string;
-}) => {
-  let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+}: PackageVersionControlOptions) => {
+  let packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as Record<
+    string,
+    unknown
+  > & {
+    name?: string;
+    version?: string;
+  };
 
-  const currentVersion = cmdFile("npm", ["show", packageJson.name, "version"], {
-    execOptions: {
-      stdio: "pipe",
-      encoding: "utf8",
+  const currentVersion = cmdFile(
+    "npm",
+    ["show", packageJson.name ?? "", "version"],
+    {
+      execOptions: {
+        stdio: "pipe",
+        encoding: "utf8",
+      },
+      successCallback: (stdout) => {
+        return stdout.trim();
+      },
+      errorCallback: (error) => {
+        consola.error(error.message);
+        return packageJson.version ?? "0.0.0";
+      },
     },
-    successCallback: (stdout) => {
-      return stdout.trim();
-    },
-    errorCallback: (error) => {
-      consola.error(error.message);
-      return packageJson.version;
-    },
-  });
+  );
 
   consola.info(`Current version: ${currentVersion}`);
 
-  let newVersion: string | null = null;
-
-  if (level === "fix") {
-    if (!releaseVersion) {
-      consola.error("Version is required for fix level");
-      process.exit(1);
-    }
-
-    newVersion = releaseVersion;
-  } else {
-    const getReleaseType = (): ReleaseType => {
-      switch (level) {
-        case "patch": {
-          if (pre) return "prepatch";
-          return "patch";
-        }
-        case "minor": {
-          if (pre) return "preminor";
-          return "minor";
-        }
-        case "major": {
-          if (pre) return "premajor";
-          return "major";
-        }
-        case "preup": {
-          return "prerelease";
-        }
-        default: {
-          return "patch";
-        }
+  const getReleaseType = (): ReleaseType => {
+    switch (level) {
+      case "patch": {
+        if (pre) return "prepatch";
+        return "patch";
       }
-    };
-    newVersion = inc(currentVersion, getReleaseType(), "beta");
-    if (!newVersion) {
-      throw new Error("Failed to calculate next version");
+      case "minor": {
+        if (pre) return "preminor";
+        return "minor";
+      }
+      case "major": {
+        if (pre) return "premajor";
+        return "major";
+      }
+      case "preup": {
+        return "prerelease";
+      }
+      default: {
+        return "patch";
+      }
     }
-  }
+  };
+
+  const resolveNewVersion = () => {
+    if (version) {
+      const nextVersion =
+        typeof version === "function"
+          ? version({
+              currentVersion,
+              packageJson: { ...packageJson },
+              level,
+              pre,
+              inc,
+            })
+          : version;
+
+      if (!valid(nextVersion)) {
+        throw new Error(`Invalid version: ${nextVersion}`);
+      }
+
+      return nextVersion;
+    }
+
+    if (!level) {
+      throw new Error(
+        "Release level is required when version is not configured",
+      );
+    }
+
+    if (level === "fix") {
+      throw new Error("Version is required for fix level");
+    }
+
+    const nextVersion = inc(currentVersion, getReleaseType(), "beta");
+
+    if (!nextVersion) {
+      throw new Error(`Failed to increment version from ${currentVersion}`);
+    }
+
+    return nextVersion;
+  };
+
+  const newVersion = resolveNewVersion();
 
   const versionUp = () => {
     packageJson.version = newVersion;

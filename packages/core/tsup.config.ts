@@ -12,7 +12,7 @@ export default defineConfig({
   clean: true,
   dts: true,
   onSuccess: async () => {
-    const binDir = path.join(cwd(), "/bin");
+    const binDir = path.join(cwd(), "bin");
     await mkdir(binDir, { recursive: true });
 
     const filesToCopy = ["dist/bin.cjs", "dist/bin.js"];

@@ -13,7 +13,7 @@
     "check": "pnpm run format:check && pnpm run lint",
     "preview": "vite preview",
     "link:core": "pnpm link ../../packages/core",
-    "rlse:test": "pnpm link:core && rlse -k config,commit-changes,create-release-branch"
+    "rlse:test": "pnpm link:core && pnpm exec rlse"
   },
   "devDependencies": {
     "@takuma-ru/rlse": "workspace:*",

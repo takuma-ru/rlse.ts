@@ -15,7 +15,7 @@ npm install @takuma-ru/rlse
 ```json filename=package.json
 {
   "scripts": {
-    "rlse": "rlse -n <name> -l <patch | minor | major | pre> -c <build command>"
+    "rlse": "rlse"
   }
 }
 ```
@@ -26,22 +26,9 @@ npm install @takuma-ru/rlse
 npm run rlse
 ```
 
-## Configure settings via CLI
-
-| Option                | Description                             | Type       | Default |
-| --------------------- | --------------------------------------- | ---------- | ------- |
-| -n, --name            | Package name                            | `string`   |         |
-| -l, --level           | Release level                           | `string`   |         |
-| -r, --release-version | Release version                         | `string`   |         |
-| -c, --command         | Build command                           | `string`   |         |
-| --pre                 | Pre-release                             | `boolean`  | `false` |
-| --git-user-name       | git config --local user.name `<name>`   | `string`   |         |
-| --git-user-email      | git config --local user.email `<email>` | `string`   |         |
-| -k                    | Skip release step                       | `string[]` | `[]`    |
-
 ## Configure settings via Setting file
 
-You can configure it without specifying options in the cli by creating `rlse.config.ts` in the project root.
+Create `rlse.config.ts` in the project root and export a release flow.
 In addition to ts, the following file formats are supported.
 
 - `rlse.config.ts`
@@ -53,42 +40,74 @@ In addition to ts, the following file formats are supported.
 ### Example
 
 ```ts filename=rlse.config.ts
-import { defineConfig } from "@takuma-ru/rlse";
+import { defineConfig, steps } from "@takuma-ru/rlse";
+
+export default defineConfig([
+  steps.configureGit({
+    name: "github-actions[bot]",
+    email: "41898282+github-actions[bot]@users.noreply.github.com",
+  }),
+  steps.resolvePackage({ name: "vanilla-ts" }),
+  steps.bumpVersion({
+    version: ({ currentVersion, inc }) =>
+      inc(currentVersion, "prerelease", "beta")!,
+  }),
+  steps.createReleaseBranch(),
+  steps.run("pnpm build"),
+  steps.commitChanges(),
+  steps.publish(),
+]);
+```
+
+Custom steps can be added with `(context) => { ... }`.
+
+CLI arguments can be declared with Zod in config and used when building the flow.
+
+```ts filename=rlse.config.ts
+import { defineConfig, steps, z } from "@takuma-ru/rlse";
 
 export default defineConfig({
-  name: "vanilla-ts",
-  level: "patch",
-  pre: false,
-  buildCmd: "pnpm build",
-  gitUserName: "github-actions[bot]",
-  gitUserEmail: "41898282+github-actions[bot]@users.noreply.github.com",
-  dryRun: true,
-  skipStep: ["config", "commit-changes", "create-release-branch"],
+  args: z.object({
+    level: z
+      .enum(["patch", "minor", "major", "preup"])
+      .default("patch")
+      .describe("Release level"),
+    pre: z.boolean().default(false).describe("Release as pre-release"),
+  }),
+  flow: ({ args }) => [
+    steps.resolvePackage({ name: "vanilla-ts" }),
+    steps.bumpVersion({
+      level: args.level,
+      pre: args.pre,
+    }),
+    steps.run("pnpm build"),
+    steps.commitChanges(),
+    steps.publish(),
+  ],
 });
+```
+
+```shell
+rlse --level minor --pre
 ```
 
 ### defineConfig Types
 
 ```ts
-type RlseConfig = {
-  name?: string | undefined;
-  pre?: boolean | undefined;
-  level?: "patch" | "minor" | "major" | "preup" | "fix" | undefined;
-  releaseVersion?: string | undefined;
-  buildCmd?: string | undefined;
-  dryRun?: boolean | undefined;
-  gitUserName?: string | undefined;
-  gitUserEmail?: string | undefined;
-  skipStep?:
-    | (
-        | "config"
-        | "create-release-branch"
-        | "build"
-        | "commit-changes"
-        | "publish"
-      )[]
-    | undefined;
-};
+type RlseConfig<TArgs extends z.AnyZodObject = z.AnyZodObject> =
+  | RlseFlowStep[]
+  | {
+      args: TArgs;
+      flow: (context: { args: z.infer<TArgs> }) => RlseFlowStep[];
+    };
+
+type RlseFlowStep =
+  | {
+      name: string;
+      run: (context: RlseContext) => Promise<void> | void;
+      rollback?: (context: RlseContext) => Promise<void> | void;
+    }
+  | ((context: RlseContext) => Promise<void> | void);
 ```
 
 ## License
