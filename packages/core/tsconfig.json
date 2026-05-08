@@ -12,6 +12,7 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "types": ["node"],
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,

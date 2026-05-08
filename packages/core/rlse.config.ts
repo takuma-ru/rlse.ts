@@ -1,8 +1,21 @@
-import { defineConfig } from "@takuma-ru/rlse";
+import { defineConfig, steps, z } from "@takuma-ru/rlse";
 
 export default defineConfig({
-  name: "@takuma-ru/rlse",
-  buildCmd: "pnpm build",
-  gitUserName: "github-actions[bot]",
-  gitUserEmail: "41898282+github-actions[bot]@users.noreply.github.com",
+  args: z.object({
+    level: z
+      .enum(["patch", "minor", "major", "preup"])
+      .default("patch")
+      .describe("Release level"),
+  }),
+  flow: ({ args }) => [
+    steps.configureGit({
+      name: "github-actions[bot]",
+      email: "41898282+github-actions[bot]@users.noreply.github.com",
+    }),
+    steps.resolvePackage({ name: "@takuma-ru/rlse" }),
+    steps.bumpVersion({ level: args.level }),
+    steps.run("pnpm build"),
+    steps.commitChanges(),
+    steps.publish(),
+  ],
 });

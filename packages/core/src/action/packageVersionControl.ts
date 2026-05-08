@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
 import { type ReleaseType, inc, valid } from "semver";
 import type { ReleaseLevel, VersionResolver } from "../types/RlseConfig";
-import { cmd } from "../utils/cmd";
+import { cmdFile } from "../utils/cmd";
 
 type PackageVersionControlOptions = {
   level?: ReleaseLevel;
@@ -25,19 +25,23 @@ export const packageVersionControl = ({
     version?: string;
   };
 
-  const currentVersion = cmd(`npm show ${packageJson.name} version`, {
-    execOptions: {
-      stdio: "pipe",
-      encoding: "utf8",
+  const currentVersion = cmdFile(
+    "npm",
+    ["show", packageJson.name ?? "", "version"],
+    {
+      execOptions: {
+        stdio: "pipe",
+        encoding: "utf8",
+      },
+      successCallback: (stdout) => {
+        return stdout.trim();
+      },
+      errorCallback: (error) => {
+        consola.error(error.message);
+        return packageJson.version ?? "0.0.0";
+      },
     },
-    successCallback: (stdout) => {
-      return stdout.trim();
-    },
-    errorCallback: (error) => {
-      consola.error(error.message);
-      return packageJson.version;
-    },
-  });
+  );
 
   consola.info(`Current version: ${currentVersion}`);
 
@@ -88,6 +92,10 @@ export const packageVersionControl = ({
       throw new Error(
         "Release level is required when version is not configured",
       );
+    }
+
+    if (level === "fix") {
+      throw new Error("Version is required for fix level");
     }
 
     const nextVersion = inc(currentVersion, getReleaseType(), "beta");

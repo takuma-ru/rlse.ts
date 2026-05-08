@@ -1,11 +1,16 @@
 {
   "name": "vanilla-ts",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "lint": "pnpm exec oxlint --config ../../oxlint.config.ts .",
+    "lint:fix": "pnpm exec oxlint --config ../../oxlint.config.ts --fix .",
+    "format": "pnpm exec oxfmt --config ../../oxfmt.config.ts .",
+    "format:check": "pnpm exec oxfmt --config ../../oxfmt.config.ts --check .",
+    "check": "pnpm run format:check && pnpm run lint",
     "preview": "vite preview",
     "link:core": "pnpm link ../../packages/core",
     "rlse:test": "pnpm link:core && pnpm exec rlse"

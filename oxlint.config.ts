@@ -1,0 +1,43 @@
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  plugins: ["typescript"],
+  env: {
+    es6: true,
+  },
+  globals: {
+    JSX: "readonly",
+  },
+  options: {
+    typeAware: true,
+    typeCheck: true,
+  },
+  ignorePatterns: [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/.turbo/**",
+    "packages/core/bin/**",
+  ],
+  overrides: [
+    {
+      files: [
+        "docs/src/**/*.ts",
+        "docs/src/**/*.tsx",
+        "playgrounds/vanilla-ts/src/**/*.ts",
+      ],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: [
+        "packages/core/**/*.ts",
+        "docs/vite.config.ts",
+        "playgrounds/vanilla-ts/rlse.config.ts",
+      ],
+      env: {
+        node: true,
+      },
+    },
+  ],
+});

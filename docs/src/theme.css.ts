@@ -42,7 +42,7 @@ export const colorDarkTokens = {
 
 export const genThemeContract = (
   obj: NestedObject,
-  baseKey?: string
+  baseKey?: string,
 ): GlobalColorTheme => {
   const themeContract: NestedObject = {};
 
@@ -58,5 +58,5 @@ export const genThemeContract = (
 };
 
 export const colors = createGlobalThemeContract(
-  genThemeContract(colorLightTokens)
+  genThemeContract(colorLightTokens),
 );

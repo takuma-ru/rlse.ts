@@ -1,3 +1,4 @@
+import process from "node:process";
 import consola from "consola";
 import { runFlow } from "../flow/runFlow";
 import type { RlseConfig } from "../types/RlseConfig";

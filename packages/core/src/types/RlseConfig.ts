@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import type { RlseFlowStep } from "../flow/types";
 
-export type ReleaseLevel = "patch" | "minor" | "major" | "preup";
+export type ReleaseLevel = "patch" | "minor" | "major" | "preup" | "fix";
 
 export type VersionResolverContext = {
   currentVersion: string;

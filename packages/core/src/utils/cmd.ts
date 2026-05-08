@@ -1,19 +1,47 @@
 import {
+  type ExecFileSyncOptionsWithStringEncoding,
   type ExecSyncOptionsWithStringEncoding,
+  execFileSync,
   execSync,
 } from "node:child_process";
 import { consola } from "consola";
 
-type Cmd = (
+type CallbackOptions = {
+  successCallback?: (stdout: string) => string;
+  errorCallback?: (error: NodeJS.ErrnoException) => string;
+};
+
+type ShellCmd = (
   command: string,
   options?: {
     execOptions?: ExecSyncOptionsWithStringEncoding;
-    successCallback?: (stdout: string) => string;
-    errorCallback?: (error: NodeJS.ErrnoException) => string;
-  },
+  } & CallbackOptions,
 ) => string;
 
-export const cmd: Cmd = (command, options) => {
+type FileCmd = (
+  file: string,
+  args?: string[],
+  options?: {
+    execOptions?: ExecFileSyncOptionsWithStringEncoding;
+  } & CallbackOptions,
+) => string;
+
+const handleCommandError = (
+  error: unknown,
+  errorCallback?: (error: NodeJS.ErrnoException) => string,
+) => {
+  const err = error as NodeJS.ErrnoException;
+
+  consola.error(err.code ?? "", err.message);
+
+  if (errorCallback) {
+    return errorCallback(err);
+  }
+
+  throw new Error(err.message);
+};
+
+export const cmd: ShellCmd = (command, options) => {
   const { execOptions, successCallback, errorCallback } = options ?? {};
   const { stdio = "inherit", encoding = "utf8" } = execOptions ?? {};
 
@@ -26,14 +54,27 @@ export const cmd: Cmd = (command, options) => {
 
     return stdout;
   } catch (error) {
-    const err = error as NodeJS.ErrnoException;
+    return handleCommandError(error, errorCallback);
+  }
+};
 
-    consola.error(err.code ?? "", err.message);
+export const cmdFile: FileCmd = (file, args = [], options) => {
+  const { execOptions, successCallback, errorCallback } = options ?? {};
+  const { stdio = "inherit", encoding = "utf8" } = execOptions ?? {};
 
-    if (errorCallback) {
-      return errorCallback(err);
+  try {
+    const stdout = execFileSync(file, args, {
+      stdio,
+      encoding,
+      ...execOptions,
+    });
+
+    if (successCallback) {
+      return successCallback(stdout);
     }
 
-    throw new Error(err.message);
+    return stdout;
+  } catch (error) {
+    return handleCommandError(error, errorCallback);
   }
 };
