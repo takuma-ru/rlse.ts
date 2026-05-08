@@ -170,6 +170,19 @@ export const commitChanges = (options?: {
         return stdout;
       },
     });
+
+    const stagedFiles = cmdFile("git", ["diff", "--cached", "--name-only"], {
+      execOptions: {
+        stdio: "pipe",
+        encoding: "utf8",
+      },
+      successCallback: (stdout) => stdout.trim(),
+    });
+    if (!stagedFiles) {
+      consola.info("No changes to commit");
+      return;
+    }
+
     cmdFile("git", ["commit", "-m", message], {
       successCallback: (stdout) => {
         consola.success(
