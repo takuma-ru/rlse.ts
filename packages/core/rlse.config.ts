@@ -1,4 +1,4 @@
-import { defineConfig, steps, z } from "@takuma-ru/rlse";
+import { defineConfig, steps, z } from "./src/main";
 
 export default defineConfig({
   args: z.object({
