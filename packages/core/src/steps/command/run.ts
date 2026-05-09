@@ -1,6 +1,6 @@
 import consola from "consola";
-import type { RlseStep } from "../flow/types";
-import { cmd } from "../utils/cmd";
+import type { RlseStep } from "../../flow/types";
+import { cmd } from "../../utils/cmd";
 
 export const run = (command: string): RlseStep => ({
   name: "run",

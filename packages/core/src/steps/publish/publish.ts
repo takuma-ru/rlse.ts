@@ -1,6 +1,6 @@
 import consola from "consola";
-import type { RlseStep } from "../flow/types";
-import { cmdFile } from "../utils/cmd";
+import type { RlseStep } from "../../flow/types";
+import { cmdFile } from "../../utils/cmd";
 
 export const publish = (options?: { dryRun?: boolean }): RlseStep => ({
   name: "publish",
