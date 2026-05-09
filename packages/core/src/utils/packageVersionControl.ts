@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import consola from "consola";
 import { type ReleaseType, inc, valid } from "semver";
 import type { ReleaseLevel, VersionResolver } from "../types/RlseConfig";
-import { cmdFile } from "../utils/cmd";
+import { cmdFile } from "./cmd";
 
 type PackageVersionControlOptions = {
   level?: ReleaseLevel;

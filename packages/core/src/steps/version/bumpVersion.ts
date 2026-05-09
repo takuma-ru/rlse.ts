@@ -1,5 +1,5 @@
-import { packageVersionControl } from "../../action/packageVersionControl";
 import type { RlseStep } from "../../flow/types";
+import { packageVersionControl } from "../../utils/packageVersionControl";
 import type { VersionOptions } from "./types";
 
 export const bumpVersion = (options: VersionOptions = {}): RlseStep => {

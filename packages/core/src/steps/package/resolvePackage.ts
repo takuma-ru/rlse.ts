@@ -1,5 +1,5 @@
-import { findPackageJsonByName } from "../../action/findPackageJsonByName";
 import type { RlseStep } from "../../flow/types";
+import { findPackageJsonByName } from "../../utils/findPackageJsonByName";
 import { readPackageJson } from "./utils";
 
 export const resolvePackage = (options: { name: string }): RlseStep => ({
