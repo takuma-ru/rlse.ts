@@ -10,6 +10,7 @@ export type RlseContext = {
   currentVersion?: string;
   newVersion?: string;
   versionReset?: () => void;
+  committed?: boolean;
   published?: boolean;
   baseBranch?: string;
   releaseBranch?: string;

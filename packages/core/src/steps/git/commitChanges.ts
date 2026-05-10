@@ -41,6 +41,7 @@ export const commitChanges = (options?: {
 
     cmdFile("git", ["commit", "-m", message], {
       successCallback: (stdout) => {
+        context.committed = true;
         consola.success(
           `Committed ${context.packageName} ${context.newVersion}`,
         );

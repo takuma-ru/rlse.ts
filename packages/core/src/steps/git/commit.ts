@@ -18,6 +18,7 @@ export const commit = (options?: {
 
     cmdFile("git", ["commit", "-m", message], {
       successCallback: (stdout) => {
+        context.committed = true;
         consola.success(`Committed ${message}`);
         return stdout;
       },
