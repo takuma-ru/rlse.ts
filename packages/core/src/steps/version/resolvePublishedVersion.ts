@@ -20,8 +20,7 @@ export const resolvePublishedVersion = (): RlseStep => ({
           encoding: "utf8",
         },
         successCallback: (stdout) => stdout.trim(),
-        errorCallback: (error) => {
-          consola.error(error.message);
+        errorCallback: () => {
           return context.packageJson?.version ?? "0.0.0";
         },
       },

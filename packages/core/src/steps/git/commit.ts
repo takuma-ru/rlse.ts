@@ -14,19 +14,32 @@ export const commit = (options?: {
       return;
     }
 
-    const message =
-      typeof options?.message === "function"
-        ? options.message(context)
-        : (options?.message ??
-          `Release ${context.packageName} ${context.newVersion}`);
+    const message = resolveCommitMessage(context, options?.message);
 
     cmdFile("git", ["commit", "-m", message], {
       successCallback: (stdout) => {
-        consola.success(
-          `Committed ${context.packageName} ${context.newVersion}`,
-        );
+        consola.success(`Committed ${message}`);
         return stdout;
       },
     });
   },
 });
+
+const resolveCommitMessage = (
+  context: Parameters<RlseStep["run"]>[0],
+  message?: string | ((context: Parameters<RlseStep["run"]>[0]) => string),
+) => {
+  if (typeof message === "function") {
+    return message(context);
+  }
+
+  if (message) {
+    return message;
+  }
+
+  if (context.packageName && context.newVersion) {
+    return `Release ${context.packageName} ${context.newVersion}`;
+  }
+
+  return "Release changes";
+};

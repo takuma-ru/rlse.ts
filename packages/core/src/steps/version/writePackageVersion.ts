@@ -29,6 +29,11 @@ export const writePackageVersion = (): RlseStep => ({
     consola.info(`New version: ${context.packageJson.version}`);
   },
   rollback: (context) => {
+    if (context.published) {
+      consola.info("Skip version reset because publish already succeeded");
+      return;
+    }
+
     context.versionReset?.();
   },
 });

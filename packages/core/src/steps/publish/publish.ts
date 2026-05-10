@@ -23,6 +23,7 @@ export const publish = (options?: { dryRun?: boolean }): RlseStep => ({
 
     cmdFile("pnpm", publishArgs, {
       successCallback: (stdout) => {
+        context.published = !dryRun;
         consola.success(
           `Published ${context.packageName} ${context.newVersion}`,
         );
