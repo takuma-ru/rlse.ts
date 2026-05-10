@@ -126,3 +126,37 @@ export default defineConfig({
     rmSync(projectDir, { recursive: true, force: true });
   }
 });
+
+test("uses npm release preset", () => {
+  const projectDir = createTempProject();
+
+  try {
+    writeFileSync(
+      path.join(projectDir, "rlse.config.mjs"),
+      `import { defineConfig, presets } from "${publicApiPath}";
+
+export default defineConfig(
+  presets.npmRelease({
+    resolvePackage: { name: "rlse-config-version-fixture" },
+    calculateNextVersion: { version: "3.0.0" },
+    publish: false,
+    commit: false,
+    push: false,
+  }),
+);\n`,
+    );
+
+    execFileSync("node", [cliPath], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+
+    const packageJson = JSON.parse(
+      readFileSync(path.join(projectDir, "package.json"), "utf8"),
+    );
+
+    assert.equal(packageJson.version, "3.0.0");
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});

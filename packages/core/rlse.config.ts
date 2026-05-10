@@ -1,4 +1,4 @@
-import { defineConfig, steps, z } from "./src/main";
+import { defineConfig, presets, z } from "./src/main";
 
 export default defineConfig({
   args: z.object({
@@ -7,15 +7,14 @@ export default defineConfig({
       .default("patch")
       .describe("Release level"),
   }),
-  flow: ({ args }) => [
-    steps.configureGit({
-      name: "github-actions[bot]",
-      email: "41898282+github-actions[bot]@users.noreply.github.com",
+  flow: ({ args }) =>
+    presets.npmRelease({
+      configureGit: {
+        name: "github-actions[bot]",
+        email: "41898282+github-actions[bot]@users.noreply.github.com",
+      },
+      resolvePackage: { name: "@takuma-ru/rlse" },
+      calculateNextVersion: { level: args.level },
+      run: "pnpm build",
     }),
-    steps.resolvePackage({ name: "@takuma-ru/rlse" }),
-    steps.bumpVersion({ level: args.level }),
-    steps.run("pnpm build"),
-    steps.commitChanges(),
-    steps.publish(),
-  ],
 });

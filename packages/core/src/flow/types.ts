@@ -9,6 +9,9 @@ export type RlseContext = {
   packageName?: string;
   currentVersion?: string;
   newVersion?: string;
+  versionReset?: () => void;
+  committed?: boolean;
+  published?: boolean;
   baseBranch?: string;
   releaseBranch?: string;
 };

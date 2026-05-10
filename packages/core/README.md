@@ -40,31 +40,49 @@ In addition to ts, the following file formats are supported.
 ### Example
 
 ```ts filename=rlse.config.ts
+import { defineConfig, presets } from "@takuma-ru/rlse";
+
+export default defineConfig(
+  presets.npmRelease({
+    resolvePackage: { name: "vanilla-ts" },
+    calculateNextVersion: {
+      version: ({ currentVersion, inc }) =>
+        inc(currentVersion, "prerelease", "beta")!,
+    },
+    run: "pnpm build",
+  }),
+);
+```
+
+The release preset is built from small public steps. Use primitives directly when
+you need full control over side effects.
+
+```ts filename=rlse.config.ts
 import { defineConfig, steps } from "@takuma-ru/rlse";
 
 export default defineConfig([
-  steps.configureGit({
-    name: "github-actions[bot]",
-    email: "41898282+github-actions[bot]@users.noreply.github.com",
-  }),
   steps.resolvePackage({ name: "vanilla-ts" }),
-  steps.bumpVersion({
-    version: ({ currentVersion, inc }) =>
-      inc(currentVersion, "prerelease", "beta")!,
-  }),
-  steps.createReleaseBranch(),
+  steps.resolvePublishedVersion(),
+  steps.calculateNextVersion({ level: "patch" }),
+  steps.writePackageVersion(),
   steps.run("pnpm build"),
-  steps.commitChanges(),
+  steps.stageFiles(),
+  steps.commit(),
   steps.publish(),
+  steps.push(),
 ]);
 ```
+
+The default npm preset commits before publishing and pushes after publishing. If
+`publish` succeeds but `push` fails, rerun after fixing git access or push the
+created commit manually.
 
 Custom steps can be added with `(context) => { ... }`.
 
 CLI arguments can be declared with Zod in config and used when building the flow.
 
 ```ts filename=rlse.config.ts
-import { defineConfig, steps, z } from "@takuma-ru/rlse";
+import { defineConfig, presets, z } from "@takuma-ru/rlse";
 
 export default defineConfig({
   args: z.object({
@@ -74,16 +92,15 @@ export default defineConfig({
       .describe("Release level"),
     pre: z.boolean().default(false).describe("Release as pre-release"),
   }),
-  flow: ({ args }) => [
-    steps.resolvePackage({ name: "vanilla-ts" }),
-    steps.bumpVersion({
-      level: args.level,
-      pre: args.pre,
+  flow: ({ args }) =>
+    presets.npmRelease({
+      resolvePackage: { name: "vanilla-ts" },
+      calculateNextVersion: {
+        level: args.level,
+        pre: args.pre,
+      },
+      run: "pnpm build",
     }),
-    steps.run("pnpm build"),
-    steps.commitChanges(),
-    steps.publish(),
-  ],
 });
 ```
 
