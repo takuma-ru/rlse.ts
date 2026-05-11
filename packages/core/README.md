@@ -54,16 +54,31 @@ export default defineConfig(
 );
 ```
 
-The release preset is built from small public steps. Use primitives directly when
-you need full control over side effects.
+The release preset includes the common npm safety checks. Add optional steps
+around it when your release needs extra side effects, such as GitHub Releases or
+changelog updates.
+
+```ts filename=rlse.config.ts
+import { defineConfig, presets, steps } from "@takuma-ru/rlse";
+
+export default defineConfig([
+  steps.checkCleanWorkingTree(),
+  ...presets.npmRelease({
+    resolvePackage: { name: "vanilla-ts" },
+    calculateNextSemver: { level: "patch" },
+    runCommand: "pnpm build",
+    commit: { message: "Release vanilla-ts" },
+    push: { branch: "main" },
+  }),
+]);
+```
+
+Use primitives directly only when you need full control over every side effect.
 
 ```ts filename=rlse.config.ts
 import { defineConfig, steps } from "@takuma-ru/rlse";
 
 export default defineConfig([
-  steps.checkCleanWorkingTree(),
-  steps.checkNpmToken(),
-  steps.checkAuth(),
   steps.resolvePackage({ name: "vanilla-ts" }),
   steps.resolvePublishedVersion({
     packageName: ({ results }) =>
@@ -80,17 +95,6 @@ export default defineConfig([
     version: ({ results }) =>
       results.findStep("calculateNextSemver").nextVersion,
   }),
-  steps.checkNpmPackageVersionAvailable({
-    packageName: ({ results }) =>
-      results.findStep("resolvePackage").packageName,
-    version: ({ results }) =>
-      results.findStep("calculateNextSemver").nextVersion,
-  }),
-  steps.updateChangelog({
-    version: ({ results }) =>
-      results.findStep("calculateNextSemver").nextVersion,
-    changes: ["Release package."],
-  }),
   steps.runCommand("pnpm build"),
   steps.stageFiles({
     paths: ({ results }) => [
@@ -103,16 +107,6 @@ export default defineConfig([
       `v${results.findStep("calculateNextSemver").nextVersion}`,
   }),
   steps.publishNpmPackage({ packageName: "vanilla-ts" }),
-  steps.verifyPublishedNpmPackage({
-    packageName: ({ results }) =>
-      results.findStep("resolvePackage").packageName,
-    version: ({ results }) =>
-      results.findStep("calculateNextSemver").nextVersion,
-  }),
-  steps.githubRelease({
-    tag: ({ results }) =>
-      `v${results.findStep("calculateNextSemver").nextVersion}`,
-  }),
   steps.push({ branch: "main" }),
 ]);
 ```
