@@ -219,3 +219,31 @@ test("collects flow step results", async () => {
     { step: "second", value: { previousStep: "first" } },
   ]);
 });
+
+test("finds latest flow step result value", async () => {
+  const { runFlow } = await import(publicApiPath);
+
+  const context = await runFlow([
+    {
+      name: "package",
+      run: () => ({ packageName: "first" }),
+    },
+    {
+      name: "package",
+      run: () => ({ packageName: "latest" }),
+    },
+  ]);
+
+  assert.equal(context.results.findStep("package").packageName, "latest");
+});
+
+test("throws when flow step result is missing", async () => {
+  const { runFlow } = await import(publicApiPath);
+
+  const context = await runFlow([]);
+
+  assert.throws(
+    () => context.results.findStep("missing"),
+    /missing result was not found/,
+  );
+});

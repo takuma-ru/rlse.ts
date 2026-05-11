@@ -64,28 +64,23 @@ export default defineConfig([
   steps.resolvePackage({ name: "vanilla-ts" }),
   steps.resolvePublishedVersion({
     packageName: ({ results }) =>
-      results.findLast(({ step }) => step === "resolvePackage")!.value
-        .packageName,
+      results.findStep("resolvePackage").packageName,
   }),
   steps.calculateNextSemver({
     currentVersion: ({ results }) =>
-      results.findLast(({ step }) => step === "resolvePublishedVersion")!.value
-        .currentVersion,
+      results.findStep("resolvePublishedVersion").currentVersion,
     level: "patch",
   }),
   steps.writePackageVersion({
     packageJsonPath: ({ results }) =>
-      results.findLast(({ step }) => step === "resolvePackage")!.value
-        .packageJsonPath,
+      results.findStep("resolvePackage").packageJsonPath,
     version: ({ results }) =>
-      results.findLast(({ step }) => step === "calculateNextSemver")!.value
-        .nextVersion,
+      results.findStep("calculateNextSemver").nextVersion,
   }),
   steps.runCommand("pnpm build"),
   steps.stageFiles({
     paths: ({ results }) => [
-      results.findLast(({ step }) => step === "resolvePackage")!.value
-        .packageJsonPath,
+      results.findStep("resolvePackage").packageJsonPath,
     ],
   }),
   steps.commit({ message: "Release vanilla-ts" }),
