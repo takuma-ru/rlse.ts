@@ -450,3 +450,34 @@ test("npm release preset includes publish safety checks by default", async () =>
     ],
   );
 });
+
+test("skips npm publish verification after dry-run publish", async () => {
+  const { runFlow, steps } = await import(publicApiPath);
+
+  const context = await runFlow(
+    [
+      steps.verifyPublishedNpmPackage({
+        packageName: "vanilla-ts",
+        version: "0.0.1",
+      }),
+    ],
+    {
+      results: [
+        {
+          step: "publishNpmPackage",
+          value: {
+            packageName: "vanilla-ts",
+            published: false,
+          },
+        },
+      ],
+    },
+  );
+
+  assert.deepEqual(context.results.findStep("verifyPublishedNpmPackage"), {
+    packageName: "vanilla-ts",
+    version: "0.0.1",
+    dryRun: true,
+    verified: false,
+  });
+});

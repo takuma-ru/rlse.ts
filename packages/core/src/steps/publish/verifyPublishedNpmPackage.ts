@@ -12,7 +12,7 @@ export const verifyPublishedNpmPackage = (options: {
     const packageName = resolveOption(options.packageName, context);
     const version = resolveOption(options.version, context);
 
-    if (context.dryRun) {
+    if (context.dryRun || wasNpmPublishSkipped(context, packageName)) {
       consola.info(`[dry-run] Skip verifying ${packageName}@${version}`);
 
       return {
@@ -52,3 +52,19 @@ export const verifyPublishedNpmPackage = (options: {
     };
   },
 });
+
+const wasNpmPublishSkipped = (
+  context: Parameters<RlseStep["run"]>[0],
+  packageName: string,
+) => {
+  return context.results.some(
+    ({ step, value }) =>
+      step === "publishNpmPackage" &&
+      typeof value === "object" &&
+      value !== null &&
+      "packageName" in value &&
+      value.packageName === packageName &&
+      "published" in value &&
+      value.published === false,
+  );
+};
