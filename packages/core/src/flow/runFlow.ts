@@ -23,8 +23,8 @@ export const runFlow = async (
   const context: RlseContext = {
     cwd: process.cwd(),
     dryRun: false,
-    results: [],
     ...initialContext,
+    results: [...(initialContext?.results ?? [])],
   };
   const completedSteps: { step: RlseStep; result: RlseStepResult }[] = [];
 

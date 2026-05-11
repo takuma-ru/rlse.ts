@@ -5,11 +5,15 @@ import { resolveOption, type Resolvable } from "../resolveOption";
 
 export const publishNpmPackage = (options: {
   packageName: Resolvable<string>;
+  packageDir?: Resolvable<string>;
   dryRun?: boolean;
 }): RlseStep => ({
   name: "publishNpmPackage",
   run: (context) => {
     const packageName = resolveOption(options.packageName, context);
+    const packageDir = options.packageDir
+      ? resolveOption(options.packageDir, context)
+      : context.cwd;
     const dryRun = options.dryRun ?? context.dryRun;
 
     const publishArgs = ["publish"];
@@ -18,6 +22,10 @@ export const publishNpmPackage = (options: {
     }
 
     cmdFile("npm", publishArgs, {
+      execOptions: {
+        cwd: packageDir,
+        encoding: "utf8",
+      },
       successCallback: (stdout) => {
         consola.success(`Published ${packageName}`);
         return stdout;
@@ -26,6 +34,7 @@ export const publishNpmPackage = (options: {
 
     return {
       packageName,
+      packageDir,
       dryRun,
       published: !dryRun,
     };

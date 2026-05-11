@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { RlseContext, RlseFlowStep } from "../flow/types";
 import type { PackageJson } from "../steps/package/utils";
 import * as steps from "../steps/index";
@@ -68,6 +69,8 @@ export const npmRelease = (options: NpmReleaseOptions): RlseFlowStep[] => {
       steps.publishNpmPackage({
         ...options.publishNpmPackage,
         packageName: (context) => getResolvePackageResult(context).packageName,
+        packageDir: (context) =>
+          path.dirname(getResolvePackageResult(context).packageJsonPath),
       }),
     );
   }

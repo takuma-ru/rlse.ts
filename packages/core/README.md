@@ -113,7 +113,7 @@ The following steps are exported from `steps`.
 | `steps.createReleaseBranch(options)`     | Creates and switches to a local release branch.                                                       | `branch`.                                                   |
 | `steps.stageFiles(options)`              | Stages files with `git add`.                                                                          | `paths`.                                                    |
 | `steps.commit(options)`                  | Commits staged files.                                                                                 | `message`, `skipIfNoChanges`.                               |
-| `steps.publishNpmPackage(options)`       | Publishes a package with `npm publish`.                                                               | `packageName`, `dryRun`.                                    |
+| `steps.publishNpmPackage(options)`       | Publishes a package with `npm publish`.                                                               | `packageName`, `packageDir`, `dryRun`.                      |
 | `steps.push(options)`                    | Pushes a branch to a remote.                                                                          | `branch`, `remote`, `setUpstream`.                          |
 
 Custom steps can be added with `(context) => { ... }`.

@@ -142,11 +142,13 @@ stdout }`.
   - Keep public, but rename to `steps.publishNpmPackage(...)`.
   - Use `npm publish` instead of the current `pnpm publish --filter` command.
   - Should accept `packageName` explicitly instead of reading it from context.
+  - Should accept `packageDir` so npm publish runs from the target package
+    directory.
   - Remove the implicit `newVersion` requirement; `version` can be optional
     metadata for result/logging if needed.
   - `dryRun` should remain supported, with runner-level dry-run still able to
     provide the default.
-  - Should return `{ packageName, dryRun, published }` style data.
+  - Should return `{ packageName, packageDir, dryRun, published }` style data.
   - No rollback; publish is not reversible.
 - `steps.push(options)`
   - Keep public.
