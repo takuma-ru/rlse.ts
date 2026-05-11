@@ -1,34 +1,42 @@
 import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
+import { resolveOption, type Resolvable } from "../resolveOption";
 
-export const publish = (options?: { dryRun?: boolean }): RlseStep => ({
-  name: "publish",
+export const publishNpmPackage = (options: {
+  packageName: Resolvable<string>;
+  packageDir?: Resolvable<string>;
+  dryRun?: boolean;
+}): RlseStep => ({
+  name: "publishNpmPackage",
   run: (context) => {
-    if (!context.packageName || !context.newVersion) {
-      throw new Error("Package and version must be resolved before publish");
-    }
+    const packageName = resolveOption(options.packageName, context);
+    const packageDir = options.packageDir
+      ? resolveOption(options.packageDir, context)
+      : context.cwd;
+    const dryRun = options.dryRun ?? context.dryRun;
 
-    const dryRun = options?.dryRun ?? context.dryRun;
-
-    const publishArgs = [
-      "publish",
-      "--filter",
-      context.packageName,
-      "--no-git-checks",
-    ];
+    const publishArgs = ["publish"];
     if (dryRun) {
       publishArgs.push("--dry-run");
     }
 
-    cmdFile("pnpm", publishArgs, {
+    cmdFile("npm", publishArgs, {
+      execOptions: {
+        cwd: packageDir,
+        encoding: "utf8",
+      },
       successCallback: (stdout) => {
-        context.published = !dryRun;
-        consola.success(
-          `Published ${context.packageName} ${context.newVersion}`,
-        );
+        consola.success(`Published ${packageName}`);
         return stdout;
       },
     });
+
+    return {
+      packageName,
+      packageDir,
+      dryRun,
+      published: !dryRun,
+    };
   },
 });

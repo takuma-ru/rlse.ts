@@ -1,12 +1,14 @@
 import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
+import { resolveOption, type Resolvable } from "../resolveOption";
 
-export const createReleaseBranch = (options?: {
-  name?: string | ((context: Parameters<RlseStep["run"]>[0]) => string);
+export const createReleaseBranch = (options: {
+  branch: Resolvable<string>;
 }): RlseStep => ({
   name: "createReleaseBranch",
   run: (context) => {
+    const branch = resolveOption(options.branch, context);
     const baseBranch = cmdFile("git", ["branch", "--show-current"], {
       execOptions: {
         stdio: "pipe",
@@ -17,35 +19,38 @@ export const createReleaseBranch = (options?: {
         return stdout.trim();
       },
     });
-    const releaseBranch =
-      typeof options?.name === "function"
-        ? options.name(context)
-        : (options?.name ??
-          `release/${new Date().toISOString().replace(/[-:.]/g, "_")}`);
 
-    context.baseBranch = baseBranch;
-    context.releaseBranch = releaseBranch;
-
-    cmdFile("git", ["switch", "-c", releaseBranch], {
+    cmdFile("git", ["switch", "-c", branch], {
       successCallback: (stdout) => {
-        consola.success(`Switched to ${releaseBranch}`);
+        consola.success(`Switched to ${branch}`);
         return stdout;
       },
     });
-    cmdFile("git", ["push", "--set-upstream", "origin", releaseBranch], {
-      successCallback: (stdout) => {
-        consola.success(`Pushed to ${releaseBranch}`);
-        return stdout;
-      },
-    });
+
+    return {
+      baseBranch,
+      branch,
+    };
   },
-  rollback: (context) => {
-    if (!context.baseBranch || !context.releaseBranch) {
+  rollback: (_, result) => {
+    if (!isCreateReleaseBranchResult(result.value)) {
       return;
     }
 
-    cmdFile("git", ["switch", context.baseBranch]);
-    cmdFile("git", ["branch", "-D", context.releaseBranch]);
-    cmdFile("git", ["push", "origin", "--delete", context.releaseBranch]);
+    cmdFile("git", ["switch", result.value.baseBranch]);
+    cmdFile("git", ["branch", "-D", result.value.branch]);
   },
 });
+
+const isCreateReleaseBranchResult = (
+  value: unknown,
+): value is { baseBranch: string; branch: string } => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "baseBranch" in value &&
+    typeof value.baseBranch === "string" &&
+    "branch" in value &&
+    typeof value.branch === "string"
+  );
+};

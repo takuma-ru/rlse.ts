@@ -1,31 +1,37 @@
 import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
+import { resolveOption, type Resolvable } from "../resolveOption";
 
-export const resolvePublishedVersion = (): RlseStep => ({
+export const resolvePublishedVersion = (options: {
+  packageName: Resolvable<string>;
+  fallbackVersion?: Resolvable<string>;
+}): RlseStep => ({
   name: "resolvePublishedVersion",
   run: (context) => {
-    if (!context.packageJsonPath || !context.packageName) {
-      throw new Error(
-        "Package must be resolved before resolvePublishedVersion",
-      );
-    }
+    const packageName = resolveOption(options.packageName, context);
+    let source: "registry" | "fallback" = "registry";
 
-    context.currentVersion = cmdFile(
-      "npm",
-      ["show", context.packageName, "version"],
-      {
-        execOptions: {
-          stdio: "pipe",
-          encoding: "utf8",
-        },
-        successCallback: (stdout) => stdout.trim(),
-        errorCallback: () => {
-          return context.packageJson?.version ?? "0.0.0";
-        },
+    const currentVersion = cmdFile("npm", ["show", packageName, "version"], {
+      execOptions: {
+        stdio: "pipe",
+        encoding: "utf8",
       },
-    );
+      successCallback: (stdout) => stdout.trim(),
+      errorCallback: () => {
+        source = "fallback";
+        return options.fallbackVersion
+          ? resolveOption(options.fallbackVersion, context)
+          : "0.0.0";
+      },
+    });
 
-    consola.info(`Current version: ${context.currentVersion}`);
+    consola.info(`Current version: ${currentVersion}`);
+
+    return {
+      packageName,
+      currentVersion,
+      source,
+    };
   },
 });

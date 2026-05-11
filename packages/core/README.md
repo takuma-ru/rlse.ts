@@ -45,11 +45,11 @@ import { defineConfig, presets } from "@takuma-ru/rlse";
 export default defineConfig(
   presets.npmRelease({
     resolvePackage: { name: "vanilla-ts" },
-    calculateNextVersion: {
+    calculateNextSemver: {
       version: ({ currentVersion, inc }) =>
         inc(currentVersion, "prerelease", "beta")!,
     },
-    run: "pnpm build",
+    runCommand: "pnpm build",
   }),
 );
 ```
@@ -62,14 +62,35 @@ import { defineConfig, steps } from "@takuma-ru/rlse";
 
 export default defineConfig([
   steps.resolvePackage({ name: "vanilla-ts" }),
-  steps.resolvePublishedVersion(),
-  steps.calculateNextVersion({ level: "patch" }),
-  steps.writePackageVersion(),
-  steps.run("pnpm build"),
-  steps.stageFiles(),
-  steps.commit(),
-  steps.publish(),
-  steps.push(),
+  steps.resolvePublishedVersion({
+    packageName: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage")!.value
+        .packageName,
+  }),
+  steps.calculateNextSemver({
+    currentVersion: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePublishedVersion")!.value
+        .currentVersion,
+    level: "patch",
+  }),
+  steps.writePackageVersion({
+    packageJsonPath: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage")!.value
+        .packageJsonPath,
+    version: ({ results }) =>
+      results.findLast(({ step }) => step === "calculateNextSemver")!.value
+        .nextVersion,
+  }),
+  steps.runCommand("pnpm build"),
+  steps.stageFiles({
+    paths: ({ results }) => [
+      results.findLast(({ step }) => step === "resolvePackage")!.value
+        .packageJsonPath,
+    ],
+  }),
+  steps.commit({ message: "Release vanilla-ts" }),
+  steps.publishNpmPackage({ packageName: "vanilla-ts" }),
+  steps.push({ branch: "main" }),
 ]);
 ```
 
@@ -81,21 +102,19 @@ created commit manually.
 
 The following steps are exported from `steps`.
 
-| Step | Description | Options |
-| --- | --- | --- |
-| `steps.resolvePackage({ name })` | Finds the target `package.json` by package name and stores package metadata in the flow context. | `name`: package name. |
-| `steps.resolvePublishedVersion()` | Reads the currently published npm version for the resolved package. Falls back to the local package version or `0.0.0`. | None. |
-| `steps.calculateNextVersion(options)` | Calculates the next semver version and stores it in the flow context. | `level`, `pre`, `version`. |
-| `steps.writePackageVersion()` | Writes the calculated version to the resolved `package.json`. Rolls back the file if the flow fails before commit or publish. | None. |
-| `steps.bumpVersion(options)` | Updates the resolved `package.json` version immediately and stores version metadata in the flow context. | `level`, `pre`, `version`. |
-| `steps.run(command)` | Runs a shell command from the current working directory. | `command`: command string. |
-| `steps.configureGit(options)` | Configures local git author settings for the repository. | `name`, `email`. |
-| `steps.createReleaseBranch(options)` | Creates and pushes a release branch, then stores the base and release branch names in the flow context. | `name`: branch name or resolver. |
-| `steps.stageFiles(options)` | Stages files with `git add`. Defaults to the resolved `package.json`. | `paths`: files to stage. |
-| `steps.commit(options)` | Commits staged files when there are changes. Defaults to a release commit message when package/version are available. | `message`: string or resolver. |
-| `steps.commitChanges(options)` | Stages the resolved `package.json`, commits it, and pushes to the current release/base branch. | `message`: string or resolver. |
-| `steps.publish(options)` | Publishes the resolved package with `pnpm publish --filter <package> --no-git-checks`. | `dryRun`. |
-| `steps.push(options)` | Pushes the current release/base/current branch to origin. | `branch`, `setUpstream`. |
+| Step                                     | Description                                                                                           | Options                                                     |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `steps.resolvePackage({ name })`         | Finds the target `package.json` by package name and stores package metadata in the flow context.      | `name`: package name.                                       |
+| `steps.resolvePublishedVersion(options)` | Reads the currently published npm version for a package.                                              | `packageName`, `fallbackVersion`.                           |
+| `steps.calculateNextSemver(options)`     | Calculates the next semver version.                                                                   | `currentVersion`, `packageJson`, `level`, `pre`, `version`. |
+| `steps.writePackageVersion(options)`     | Writes a version to a `package.json`. Rolls back the file if the flow fails before commit or publish. | `packageJsonPath`, `version`.                               |
+| `steps.runCommand(command, options)`     | Runs a shell command from the current working directory.                                              | Same options as the internal command helper.                |
+| `steps.configureGitUser(options)`        | Configures local git author settings for the repository.                                              | `name`, `email`.                                            |
+| `steps.createReleaseBranch(options)`     | Creates and switches to a local release branch.                                                       | `branch`.                                                   |
+| `steps.stageFiles(options)`              | Stages files with `git add`.                                                                          | `paths`.                                                    |
+| `steps.commit(options)`                  | Commits staged files.                                                                                 | `message`, `skipIfNoChanges`.                               |
+| `steps.publishNpmPackage(options)`       | Publishes a package with `npm publish`.                                                               | `packageName`, `packageDir`, `dryRun`.                      |
+| `steps.push(options)`                    | Pushes a branch to a remote.                                                                          | `branch`, `remote`, `setUpstream`.                          |
 
 Custom steps can be added with `(context) => { ... }`.
 
@@ -115,11 +134,11 @@ export default defineConfig({
   flow: ({ args }) =>
     presets.npmRelease({
       resolvePackage: { name: "vanilla-ts" },
-      calculateNextVersion: {
+      calculateNextSemver: {
         level: args.level,
         pre: args.pre,
       },
-      run: "pnpm build",
+      runCommand: "pnpm build",
     }),
 });
 ```
@@ -141,10 +160,13 @@ type RlseConfig<TArgs extends z.AnyZodObject = z.AnyZodObject> =
 type RlseFlowStep =
   | {
       name: string;
-      run: (context: RlseContext) => Promise<void> | void;
-      rollback?: (context: RlseContext) => Promise<void> | void;
+      run: (context: RlseContext) => unknown;
+      rollback?: (
+        context: RlseContext,
+        result: RlseStepResult,
+      ) => Promise<void> | void;
     }
-  | ((context: RlseContext) => Promise<void> | void);
+  | ((context: RlseContext) => unknown);
 ```
 
 ## License
