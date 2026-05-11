@@ -1,19 +1,15 @@
 import clsx from "clsx";
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  FC,
-  PropsWithChildren,
-} from "react";
+import type { Child } from "hono/jsx";
+import type { JSX } from "hono/jsx";
 import { anchor, button } from "./Button.css";
 
-type Props = PropsWithChildren & (AnchorProps | ButtonProps);
-type AnchorProps = { tagType: "a" } & AnchorHTMLAttributes<HTMLAnchorElement>;
+type Props = { children?: Child } & (AnchorProps | ButtonProps);
+type AnchorProps = { tagType: "a" } & JSX.IntrinsicElements["a"];
 type ButtonProps = {
   tagType: "button";
-} & ButtonHTMLAttributes<HTMLButtonElement>;
+} & JSX.IntrinsicElements["button"];
 
-export const Button: FC<Props> = (props) => {
+export const Button = (props: Props) => {
   switch (props.tagType) {
     case "a": {
       const { children, ...attr } = props;

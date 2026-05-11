@@ -1,78 +1,15 @@
 import clsx from "clsx";
-import {
-  Children,
-  type ClassAttributes,
-  type HTMLAttributes,
-  type ReactNode,
-  isValidElement,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  copyButton,
-  fileNameText,
-  langText,
-  metaContainer,
-  pre,
-  preContainer,
-} from "./Pre.css";
-
-import type React from "react";
-import MaterialSymbolsContentCopyOutlineRounded from "~icons/material-symbols/content-copy-outline-rounded";
-import MaterialSymbolsDoneAll from "~icons/material-symbols/done-all";
+import type { JSX } from "hono/jsx";
+import { fileNameText, langText, metaContainer, pre, preContainer } from "./Pre.css";
 import { LangIcon } from "./utils/LangIcon";
 
-const extractTextFromChildren = (children: ReactNode): string => {
-  let text = "";
-
-  Children.forEach(children, (child) => {
-    if (typeof child === "string" || typeof child === "number") {
-      text += child;
-    } else if (isValidElement(child)) {
-      text += extractTextFromChildren(child.props.children);
-    }
-  });
-
-  return text;
+type Props = JSX.IntrinsicElements["pre"] & {
+  lang?: string;
+  "data-filename"?: string;
 };
 
-export const Pre: React.FC<
-  JSX.IntrinsicAttributes &
-    ClassAttributes<HTMLPreElement> &
-    HTMLAttributes<HTMLPreElement>
-> = ({ children, className, lang, ...attr }) => {
-  const preRef = useRef<HTMLPreElement | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (preRef.current) {
-      const filename = preRef.current.getAttribute("data-filename");
-      setFileName(filename);
-    }
-  }, []);
-
-  const handleCopy = () => {
-    if (isCopied) {
-      return;
-    }
-    if (!children) {
-      return;
-    }
-
-    navigator.clipboard
-      .writeText(extractTextFromChildren(children))
-      .then(() => {
-        setIsCopied(true);
-        setTimeout(() => {
-          setIsCopied(false);
-        }, 2000);
-      })
-      .catch(() => {
-        setIsCopied(false);
-      });
-  };
+export const Pre = ({ children, className, lang, ...attr }: Props) => {
+  const fileName = attr["data-filename"];
 
   return (
     <div className={preContainer}>
@@ -83,17 +20,10 @@ export const Pre: React.FC<
           <LangIcon lang={lang} />
         </span>
       </div>
-      <pre ref={preRef} {...attr} lang={lang} className={clsx(pre, className)}>
+      <pre {...attr} lang={lang} className={clsx(pre, className)}>
         {/* {lang === "shell" && <span className={promptText}>$</span>} */}
         {children}
       </pre>
-      <button className={copyButton} type="button" onClick={handleCopy}>
-        {isCopied ? (
-          <MaterialSymbolsDoneAll />
-        ) : (
-          <MaterialSymbolsContentCopyOutlineRounded />
-        )}
-      </button>
     </div>
   );
 };

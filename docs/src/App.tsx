@@ -1,4 +1,3 @@
-import { MDXProvider } from "@mdx-js/react";
 import type { MDXComponents } from "mdx/types";
 import AppMd from "./App.mdx";
 import { AppLayout } from "./components/layouts/AppLayout/AppLayout";
@@ -14,11 +13,9 @@ const components: MDXComponents = {
 
 function App() {
   return (
-    <MDXProvider components={components}>
-      <AppLayout>
-        <AppMd />
-      </AppLayout>
-    </MDXProvider>
+    <AppLayout>
+      <AppMd components={components} />
+    </AppLayout>
   );
 }
 

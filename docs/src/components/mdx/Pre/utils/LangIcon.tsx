@@ -1,15 +1,14 @@
-import AkarIconsTypescriptFill from "~icons/akar-icons/typescript-fill";
-import ClarityCommandLine from "~icons/clarity/command-line";
-import MdiCodeJson from "~icons/mdi/code-json";
+import type { Child } from "hono/jsx";
+import { CodeJsonIcon, CommandLineIcon, TypescriptIcon } from "../../../Icon";
 
 const langIcon = {
-  shell: <ClarityCommandLine />,
-  json: <MdiCodeJson />,
-  typescript: <AkarIconsTypescriptFill />,
-  ts: <AkarIconsTypescriptFill />,
-} as const satisfies Record<string, JSX.Element>;
+  shell: <CommandLineIcon />,
+  json: <CodeJsonIcon />,
+  typescript: <TypescriptIcon />,
+  ts: <TypescriptIcon />,
+} as const satisfies Record<string, Child>;
 
-export const LangIcon: React.FC<{ lang: string | undefined }> = ({ lang }) => {
+export const LangIcon = ({ lang }: { lang: string | undefined }) => {
   if (!lang) {
     return null;
   }
