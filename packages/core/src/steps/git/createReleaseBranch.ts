@@ -11,6 +11,7 @@ export const createReleaseBranch = (options: {
     const branch = resolveOption(options.branch, context);
     const baseBranch = cmdFile("git", ["branch", "--show-current"], {
       execOptions: {
+        cwd: context.cwd,
         stdio: "pipe",
         encoding: "utf8",
       },
@@ -20,7 +21,22 @@ export const createReleaseBranch = (options: {
       },
     });
 
+    if (context.dryRun) {
+      consola.info(`[dry-run] Skip git switch -c ${branch}`);
+
+      return {
+        baseBranch,
+        branch,
+        dryRun: true,
+        created: false,
+      };
+    }
+
     cmdFile("git", ["switch", "-c", branch], {
+      execOptions: {
+        cwd: context.cwd,
+        encoding: "utf8",
+      },
       successCallback: (stdout) => {
         consola.success(`Switched to ${branch}`);
         return stdout;
@@ -30,27 +46,41 @@ export const createReleaseBranch = (options: {
     return {
       baseBranch,
       branch,
+      dryRun: false,
+      created: true,
     };
   },
-  rollback: (_, result) => {
-    if (!isCreateReleaseBranchResult(result.value)) {
+  rollback: (context, result) => {
+    if (!isCreateReleaseBranchResult(result.value) || !result.value.created) {
       return;
     }
 
-    cmdFile("git", ["switch", result.value.baseBranch]);
-    cmdFile("git", ["branch", "-D", result.value.branch]);
+    cmdFile("git", ["switch", result.value.baseBranch], {
+      execOptions: {
+        cwd: context.cwd,
+        encoding: "utf8",
+      },
+    });
+    cmdFile("git", ["branch", "-D", result.value.branch], {
+      execOptions: {
+        cwd: context.cwd,
+        encoding: "utf8",
+      },
+    });
   },
 });
 
 const isCreateReleaseBranchResult = (
   value: unknown,
-): value is { baseBranch: string; branch: string } => {
+): value is { baseBranch: string; branch: string; created: boolean } => {
   return (
     typeof value === "object" &&
     value !== null &&
     "baseBranch" in value &&
     typeof value.baseBranch === "string" &&
     "branch" in value &&
-    typeof value.branch === "string"
+    typeof value.branch === "string" &&
+    "created" in value &&
+    typeof value.created === "boolean"
   );
 };

@@ -7,11 +7,12 @@ import { parseFlowSchema, parseReleaseSchema } from "../validation/validation";
 export const releaseAction = async (
   options: unknown,
   args: Record<string, string | boolean> = {},
+  initialContext?: { dryRun?: boolean },
 ) => {
   try {
     const config = parseReleaseSchema(options);
     const flow = resolveFlow(config, args);
-    await runFlow(parseFlowSchema(flow));
+    await runFlow(parseFlowSchema(flow), initialContext);
   } catch (error) {
     consola.error(error);
     process.exit(1);

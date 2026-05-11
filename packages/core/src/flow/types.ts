@@ -31,6 +31,55 @@ export type RlseKnownStepResults = {
     level?: ReleaseLevel;
     pre: boolean;
   };
+  checkCleanWorkingTree: {
+    clean: boolean;
+    allowUntracked: boolean;
+  };
+  tag: {
+    name: string;
+    message?: string;
+    dryRun: boolean;
+    tagged: boolean;
+  };
+  checkGitHubAuth: {
+    authenticated: boolean;
+  };
+  checkAuth: {
+    authenticated: boolean;
+  };
+  checkNpmToken: {
+    authenticated: boolean;
+    username: string;
+  };
+  githubRelease: {
+    tag: string;
+    title: string;
+    notes?: string;
+    draft: boolean;
+    prerelease: boolean;
+    dryRun: boolean;
+    released: boolean;
+  };
+  updateChangelog: {
+    path: string;
+    version: string;
+    date: string;
+    changes: string[];
+    previousContent?: string;
+    dryRun: boolean;
+    updated: boolean;
+  };
+  checkNpmPackageVersionAvailable: {
+    packageName: string;
+    version: string;
+    available: boolean;
+  };
+  verifyPublishedNpmPackage: {
+    packageName: string;
+    version: string;
+    dryRun: boolean;
+    verified: boolean;
+  };
 };
 
 export type RlseStepResult = {

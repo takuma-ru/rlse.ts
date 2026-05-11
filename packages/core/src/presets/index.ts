@@ -14,6 +14,8 @@ type NpmReleaseOptions = {
   publishNpmPackage?:
     | false
     | Omit<Parameters<typeof steps.publishNpmPackage>[0], "packageName">;
+  checkNpmPackageVersionAvailable?: false;
+  verifyPublishedNpmPackage?: false;
   stageFiles?: false | Omit<Parameters<typeof steps.stageFiles>[0], "paths">;
   commit?: false | Parameters<typeof steps.commit>[0];
   push?: false | Parameters<typeof steps.push>[0];
@@ -65,6 +67,17 @@ export const npmRelease = (options: NpmReleaseOptions): RlseFlowStep[] => {
   }
 
   if (options.publishNpmPackage !== false) {
+    if (options.checkNpmPackageVersionAvailable !== false) {
+      flow.push(
+        steps.checkNpmPackageVersionAvailable({
+          packageName: (context) =>
+            getResolvePackageResult(context).packageName,
+          version: (context) =>
+            getCalculateNextSemverResult(context).nextVersion,
+        }),
+      );
+    }
+
     flow.push(
       steps.publishNpmPackage({
         ...options.publishNpmPackage,
@@ -73,6 +86,17 @@ export const npmRelease = (options: NpmReleaseOptions): RlseFlowStep[] => {
           path.dirname(getResolvePackageResult(context).packageJsonPath),
       }),
     );
+
+    if (options.verifyPublishedNpmPackage !== false) {
+      flow.push(
+        steps.verifyPublishedNpmPackage({
+          packageName: (context) =>
+            getResolvePackageResult(context).packageName,
+          version: (context) =>
+            getCalculateNextSemverResult(context).nextVersion,
+        }),
+      );
+    }
   }
 
   if (options.push !== false && options.push) {
