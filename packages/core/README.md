@@ -116,32 +116,83 @@ publishes, verifies the package on the npm registry, commits before publishing,
 and pushes after publishing. If `publish` succeeds but `push` fails, rerun after
 fixing git access or push the created commit manually.
 
-### Available steps
+### API
+
+Rlse exports `defineConfig`, `presets`, `steps`, `runFlow`, and `z`.
+
+#### Presets
+
+| API                           | Description                                                                                                                                                                         |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `presets.npmRelease(options)` | Builds the common npm release flow: resolve package, calculate version, write version, optionally run a command, commit, check npm availability, publish, verify publish, and push. |
+
+#### Step Groups
+
+Use presets for the common path. Use individual steps when you need to insert,
+remove, or reorder release side effects.
+
+| Group           | Steps                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| Auth checks     | `checkAuth`, `checkGitHubAuth`, `checkNpmToken`                                           |
+| Package/version | `resolvePackage`, `resolvePublishedVersion`, `calculateNextSemver`, `writePackageVersion` |
+| Safety checks   | `checkCleanWorkingTree`, `checkNpmPackageVersionAvailable`, `verifyPublishedNpmPackage`   |
+| Git operations  | `configureGitUser`, `createReleaseBranch`, `stageFiles`, `commit`, `tag`, `push`          |
+| Release outputs | `publishNpmPackage`, `githubRelease`, `updateChangelog`                                   |
+| Commands        | `runCommand`                                                                              |
+
+#### Step Reference
 
 The following steps are exported from `steps`.
 
-| Step                                             | Description                                                                                           | Options                                                     |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `steps.checkAuth()`                              | Fails when GitHub CLI authentication is unavailable.                                                  | None.                                                       |
-| `steps.checkGitHubAuth()`                        | Fails when GitHub CLI authentication is unavailable.                                                  | None.                                                       |
-| `steps.checkNpmToken()`                          | Fails when npm authentication is unavailable.                                                         | None.                                                       |
-| `steps.resolvePackage({ name })`                 | Finds the target `package.json` by package name and stores package metadata in the flow context.      | `name`: package name.                                       |
-| `steps.resolvePublishedVersion(options)`         | Reads the currently published npm version for a package.                                              | `packageName`, `fallbackVersion`.                           |
-| `steps.calculateNextSemver(options)`             | Calculates the next semver version.                                                                   | `currentVersion`, `packageJson`, `level`, `pre`, `version`. |
-| `steps.writePackageVersion(options)`             | Writes a version to a `package.json`. Rolls back the file if the flow fails before commit or publish. | `packageJsonPath`, `version`.                               |
-| `steps.updateChangelog(options)`                 | Adds a version entry to a changelog and rolls it back if a later step fails.                          | `version`, `path`, `date`, `changes`.                       |
-| `steps.runCommand(command, options)`             | Runs a shell command from the current working directory.                                              | Same options as the internal command helper.                |
-| `steps.checkCleanWorkingTree(options)`           | Fails when the git working tree has uncommitted changes.                                              | `allowUntracked`.                                           |
-| `steps.configureGitUser(options)`                | Configures local git author settings for the repository.                                              | `name`, `email`.                                            |
-| `steps.createReleaseBranch(options)`             | Creates and switches to a local release branch.                                                       | `branch`.                                                   |
-| `steps.stageFiles(options)`                      | Stages files with `git add`.                                                                          | `paths`.                                                    |
-| `steps.commit(options)`                          | Commits staged files.                                                                                 | `message`, `skipIfNoChanges`.                               |
-| `steps.tag(options)`                             | Creates a git tag and deletes it if a later step fails.                                               | `name`, `message`.                                          |
-| `steps.checkNpmPackageVersionAvailable(options)` | Fails when the target npm package version already exists.                                             | `packageName`, `version`.                                   |
-| `steps.publishNpmPackage(options)`               | Publishes a package with `npm publish`.                                                               | `packageName`, `packageDir`, `dryRun`.                      |
-| `steps.verifyPublishedNpmPackage(options)`       | Verifies that the published npm package version is visible on the registry.                           | `packageName`, `version`.                                   |
-| `steps.githubRelease(options)`                   | Creates a GitHub Release with `gh release create` and deletes it if a later step fails.               | `tag`, `title`, `notes`, `draft`, `prerelease`.             |
-| `steps.push(options)`                            | Pushes a branch to a remote.                                                                          | `branch`, `remote`, `setUpstream`.                          |
+**Auth**
+
+| Step                      | Description                                          | Options |
+| ------------------------- | ---------------------------------------------------- | ------- |
+| `steps.checkAuth()`       | Alias of `checkGitHubAuth`.                          | None.   |
+| `steps.checkGitHubAuth()` | Fails when GitHub CLI authentication is unavailable. | None.   |
+| `steps.checkNpmToken()`   | Fails when npm authentication is unavailable.        | None.   |
+
+**Package And Version**
+
+| Step                                     | Description                                                                | Options                                                     |
+| ---------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `steps.resolvePackage({ name })`         | Finds the target `package.json` by package name.                           | `name`.                                                     |
+| `steps.resolvePublishedVersion(options)` | Reads the currently published npm version for a package.                   | `packageName`, `fallbackVersion`.                           |
+| `steps.calculateNextSemver(options)`     | Calculates the next semver version.                                        | `currentVersion`, `packageJson`, `level`, `pre`, `version`. |
+| `steps.writePackageVersion(options)`     | Writes a version to a `package.json`. Rolls back before commit or publish. | `packageJsonPath`, `version`.                               |
+
+**Safety**
+
+| Step                                             | Description                                                                 | Options                   |
+| ------------------------------------------------ | --------------------------------------------------------------------------- | ------------------------- |
+| `steps.checkCleanWorkingTree(options)`           | Fails when the git working tree has uncommitted changes.                    | `allowUntracked`.         |
+| `steps.checkNpmPackageVersionAvailable(options)` | Fails when the target npm package version already exists.                   | `packageName`, `version`. |
+| `steps.verifyPublishedNpmPackage(options)`       | Verifies that the published npm package version is visible on the registry. | `packageName`, `version`. |
+
+**Git**
+
+| Step                                 | Description                                              | Options                            |
+| ------------------------------------ | -------------------------------------------------------- | ---------------------------------- |
+| `steps.configureGitUser(options)`    | Configures local git author settings for the repository. | `name`, `email`.                   |
+| `steps.createReleaseBranch(options)` | Creates and switches to a local release branch.          | `branch`.                          |
+| `steps.stageFiles(options)`          | Stages files with `git add`.                             | `paths`.                           |
+| `steps.commit(options)`              | Commits staged files.                                    | `message`, `skipIfNoChanges`.      |
+| `steps.tag(options)`                 | Creates a git tag and deletes it if a later step fails.  | `name`, `message`.                 |
+| `steps.push(options)`                | Pushes a branch to a remote.                             | `branch`, `remote`, `setUpstream`. |
+
+**Release Outputs**
+
+| Step                               | Description                                                                             | Options                                         |
+| ---------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `steps.publishNpmPackage(options)` | Publishes a package with `npm publish`.                                                 | `packageName`, `packageDir`, `dryRun`.          |
+| `steps.githubRelease(options)`     | Creates a GitHub Release with `gh release create` and deletes it if a later step fails. | `tag`, `title`, `notes`, `draft`, `prerelease`. |
+| `steps.updateChangelog(options)`   | Adds a version entry to a changelog and rolls it back if a later step fails.            | `version`, `path`, `date`, `changes`.           |
+
+**Commands**
+
+| Step                                 | Description                                              | Options                                      |
+| ------------------------------------ | -------------------------------------------------------- | -------------------------------------------- |
+| `steps.runCommand(command, options)` | Runs a shell command from the current working directory. | Same options as the internal command helper. |
 
 Custom steps can be added with `(context) => { ... }`.
 
