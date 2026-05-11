@@ -10,6 +10,7 @@ import { parseReleaseSchema } from "./validation/validation";
 const program = new Command();
 
 const thisPackageVersion = packageJson.version as string;
+const reservedArgNames = new Set(["dry-run"]);
 
 const main = async () => {
   const config = parseReleaseSchema(await loadRlseConfig());
@@ -43,6 +44,7 @@ const getArgSchemas = (config: RlseConfig) => {
 
 const createOption = (name: string, schema: z.ZodTypeAny) => {
   const { defaultValue, schema: optionSchema } = unwrapSchema(schema);
+  assertNotReservedArgName(name);
   assertSupportedArgSchema(name, optionSchema);
   const option = new Option(
     createFlags(name, optionSchema),
@@ -59,6 +61,18 @@ const createOption = (name: string, schema: z.ZodTypeAny) => {
   }
 
   return option;
+};
+
+const assertNotReservedArgName = (name: string) => {
+  const flagName = toKebabCase(name);
+
+  if (!reservedArgNames.has(flagName)) {
+    return;
+  }
+
+  throw new Error(
+    `Unsupported CLI argument name: ${name}. --${flagName} is reserved by rlse.`,
+  );
 };
 
 const unwrapSchema = (schema: z.ZodTypeAny) => {

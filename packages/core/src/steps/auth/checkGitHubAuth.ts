@@ -8,6 +8,7 @@ export const checkGitHubAuth = (): RlseStep => ({
     cmdFile("gh", ["auth", "status"], {
       execOptions: {
         cwd: context.cwd,
+        stdio: "pipe",
         encoding: "utf8",
       },
     });

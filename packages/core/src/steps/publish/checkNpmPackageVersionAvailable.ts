@@ -1,6 +1,6 @@
 import consola from "consola";
 import type { RlseStep } from "../../flow/types";
-import { cmdFile } from "../../utils/cmd";
+import { resolveNpmPackageVersion } from "./utils";
 import { resolveOption, type Resolvable } from "../resolveOption";
 
 export const checkNpmPackageVersionAvailable = (options: {
@@ -11,18 +11,10 @@ export const checkNpmPackageVersionAvailable = (options: {
   run: (context) => {
     const packageName = resolveOption(options.packageName, context);
     const version = resolveOption(options.version, context);
-    const publishedVersion = cmdFile(
-      "npm",
-      ["view", `${packageName}@${version}`, "version"],
-      {
-        execOptions: {
-          cwd: context.cwd,
-          stdio: "pipe",
-          encoding: "utf8",
-        },
-        successCallback: (stdout) => stdout.trim(),
-        errorCallback: () => "",
-      },
+    const publishedVersion = resolveNpmPackageVersion(
+      packageName,
+      version,
+      context.cwd,
     );
 
     if (publishedVersion === version) {

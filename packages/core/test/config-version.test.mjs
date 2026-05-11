@@ -481,3 +481,57 @@ test("skips npm publish verification after dry-run publish", async () => {
     verified: false,
   });
 });
+
+test("rejects config args that collide with built-in dry-run", () => {
+  const projectDir = createTempProject();
+
+  try {
+    writeFileSync(
+      path.join(projectDir, "rlse.config.mjs"),
+      `import { defineConfig, z } from "${publicApiPath}";
+
+export default defineConfig({
+  args: z.object({
+    dryRun: z.boolean().default(false),
+  }),
+  flow: () => [
+    {
+      name: "noop",
+      run: () => undefined,
+    },
+  ],
+});\n`,
+    );
+
+    assert.throws(
+      () =>
+        execFileSync("node", [cliPath], {
+          cwd: projectDir,
+          stdio: "pipe",
+        }),
+      /--dry-run is reserved by rlse/,
+    );
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
+
+test("checks npm package version availability without noisy command errors", async () => {
+  const { runFlow, steps } = await import(publicApiPath);
+
+  const context = await runFlow([
+    steps.checkNpmPackageVersionAvailable({
+      packageName: "rlse-config-version-fixture-that-should-not-exist",
+      version: "99.99.99",
+    }),
+  ]);
+
+  assert.deepEqual(
+    context.results.findStep("checkNpmPackageVersionAvailable"),
+    {
+      packageName: "rlse-config-version-fixture-that-should-not-exist",
+      version: "99.99.99",
+      available: true,
+    },
+  );
+});
