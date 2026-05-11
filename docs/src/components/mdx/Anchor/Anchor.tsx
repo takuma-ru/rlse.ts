@@ -1,13 +1,10 @@
-import type { AnchorHTMLAttributes, ClassAttributes, FC } from "react";
-import MaterialSymbolsOpenInNewRounded from "~icons/material-symbols/open-in-new-rounded";
-
+import type { JSX } from "hono/jsx";
+import { OpenInNewIcon } from "../../Icon";
 import { anchor } from "./Anchor.css";
 
-export const Anchor: FC<
-  JSX.IntrinsicAttributes &
-    ClassAttributes<HTMLAnchorElement> &
-    AnchorHTMLAttributes<HTMLAnchorElement>
-> = ({ children, ...props }) => {
+type Props = JSX.IntrinsicElements["a"];
+
+export const Anchor = ({ children, ...props }: Props) => {
   const { href } = props;
 
   const isExternal = href?.startsWith("http") ?? false;
@@ -20,7 +17,7 @@ export const Anchor: FC<
       {...props}
     >
       {children}
-      <MaterialSymbolsOpenInNewRounded />
+      {isExternal && <OpenInNewIcon />}
     </a>
   );
 };

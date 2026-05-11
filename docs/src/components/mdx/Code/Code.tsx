@@ -1,12 +1,10 @@
 import clsx from "clsx";
-import type { ClassAttributes, FC, HTMLAttributes } from "react";
+import type { JSX } from "hono/jsx";
 import { inlineCode } from "./Code.css";
 
-export const Code: FC<
-  JSX.IntrinsicAttributes &
-    ClassAttributes<HTMLElement> &
-    HTMLAttributes<HTMLElement>
-> = ({ children, ...attr }) => {
+type Props = JSX.IntrinsicElements["code"];
+
+export const Code = ({ children, ...attr }: Props) => {
   return (
     <code
       {...attr}

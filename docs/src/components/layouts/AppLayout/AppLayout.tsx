@@ -1,11 +1,13 @@
-import type { FC, PropsWithChildren } from "react";
+import type { Child } from "hono/jsx";
 import { Footer } from "../Footer/Footer";
 import { Header } from "../Header/Header";
 import { main } from "./AppLayout.css";
 
-type Props = PropsWithChildren;
+type Props = {
+  children?: Child;
+};
 
-export const AppLayout: FC<Props> = ({ children }) => {
+export const AppLayout = ({ children }: Props) => {
   return (
     <div id="app">
       <Header />

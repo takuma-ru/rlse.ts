@@ -1,10 +1,8 @@
-import type { FC } from "react";
-import SimpleIconsGithub from "~icons/simple-icons/github";
-import SimpleIconsNpm from "~icons/simple-icons/npm";
 import { config } from "../../../config";
+import { GithubIcon, NpmIcon } from "../../Icon";
 import { header, links, titleAnchor, titleText } from "./Header.css";
 
-export const Header: FC = () => {
+export const Header = () => {
   return (
     <header className={header}>
       <a className={titleAnchor} href="/">
@@ -16,14 +14,14 @@ export const Header: FC = () => {
           target="_blank"
           rel="noreferrer"
         >
-          <SimpleIconsGithub />
+          <GithubIcon />
         </a>
         <a
           href="https://www.npmjs.com/package/@takuma-ru/rlse"
           target="_blank"
           rel="noreferrer"
         >
-          <SimpleIconsNpm />
+          <NpmIcon />
         </a>
       </div>
     </header>
