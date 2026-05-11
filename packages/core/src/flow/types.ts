@@ -11,7 +11,7 @@ export interface RlseResults extends Array<RlseStepResult> {
   findStep<Step extends keyof RlseKnownStepResults>(
     step: Step,
   ): RlseKnownStepResults[Step];
-  findStep<T = Record<string, unknown>>(step: string): T;
+  findStep<T = unknown>(step: string): T;
 }
 
 export type RlseKnownStepResults = {
