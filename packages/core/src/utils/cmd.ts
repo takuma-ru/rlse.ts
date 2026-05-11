@@ -9,7 +9,7 @@ import { consola } from "consola";
 type CallbackOptions = {
   successCallback?: (stdout: string) => string;
   errorCallback?: (error: NodeJS.ErrnoException) => string;
-  silentError?: boolean;
+  silentError?: boolean | ((error: NodeJS.ErrnoException) => boolean);
 };
 
 type ShellCmd = (
@@ -30,11 +30,14 @@ type FileCmd = (
 const handleCommandError = (
   error: unknown,
   errorCallback?: (error: NodeJS.ErrnoException) => string,
-  silentError?: boolean,
+  silentError?: boolean | ((error: NodeJS.ErrnoException) => boolean),
 ) => {
   const err = error as NodeJS.ErrnoException;
 
-  if (!silentError) {
+  const shouldSuppressErrorLog =
+    typeof silentError === "function" ? silentError(err) : silentError;
+
+  if (!shouldSuppressErrorLog) {
     consola.error(err.code ?? "", err.message);
   }
 
