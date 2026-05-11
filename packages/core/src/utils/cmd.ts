@@ -9,6 +9,7 @@ import { consola } from "consola";
 type CallbackOptions = {
   successCallback?: (stdout: string) => string;
   errorCallback?: (error: NodeJS.ErrnoException) => string;
+  silentError?: boolean;
 };
 
 type ShellCmd = (
@@ -29,10 +30,13 @@ type FileCmd = (
 const handleCommandError = (
   error: unknown,
   errorCallback?: (error: NodeJS.ErrnoException) => string,
+  silentError?: boolean,
 ) => {
   const err = error as NodeJS.ErrnoException;
 
-  consola.error(err.code ?? "", err.message);
+  if (!silentError) {
+    consola.error(err.code ?? "", err.message);
+  }
 
   if (errorCallback) {
     return errorCallback(err);
@@ -42,7 +46,8 @@ const handleCommandError = (
 };
 
 export const cmd: ShellCmd = (command, options) => {
-  const { execOptions, successCallback, errorCallback } = options ?? {};
+  const { execOptions, successCallback, errorCallback, silentError } =
+    options ?? {};
   const { stdio = "inherit", encoding = "utf8" } = execOptions ?? {};
 
   try {
@@ -54,12 +59,13 @@ export const cmd: ShellCmd = (command, options) => {
 
     return stdout;
   } catch (error) {
-    return handleCommandError(error, errorCallback);
+    return handleCommandError(error, errorCallback, silentError);
   }
 };
 
 export const cmdFile: FileCmd = (file, args = [], options) => {
-  const { execOptions, successCallback, errorCallback } = options ?? {};
+  const { execOptions, successCallback, errorCallback, silentError } =
+    options ?? {};
   const { stdio = "inherit", encoding = "utf8" } = execOptions ?? {};
 
   try {
@@ -75,6 +81,6 @@ export const cmdFile: FileCmd = (file, args = [], options) => {
 
     return stdout;
   } catch (error) {
-    return handleCommandError(error, errorCallback);
+    return handleCommandError(error, errorCallback, silentError);
   }
 };

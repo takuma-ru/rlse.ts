@@ -1,21 +1,18 @@
-import { execFileSync } from "node:child_process";
+import { cmdFile } from "../../utils/cmd";
 
 export const resolveNpmPackageVersion = (
   packageName: string,
   version: string,
   cwd: string,
 ) => {
-  try {
-    return execFileSync(
-      "npm",
-      ["view", `${packageName}@${version}`, "version"],
-      {
-        cwd,
-        stdio: "pipe",
-        encoding: "utf8",
-      },
-    ).trim();
-  } catch {
-    return "";
-  }
+  return cmdFile("npm", ["view", `${packageName}@${version}`, "version"], {
+    execOptions: {
+      cwd,
+      stdio: "pipe",
+      encoding: "utf8",
+    },
+    successCallback: (stdout) => stdout.trim(),
+    errorCallback: () => "",
+    silentError: true,
+  });
 };
