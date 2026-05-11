@@ -1,6 +1,7 @@
 import type {
   RlseContext,
   RlseFlowStep,
+  RlseResults,
   RlseStep,
   RlseStepResult,
 } from "./types";
@@ -16,15 +17,35 @@ const normalizeStep = (step: RlseFlowStep): RlseStep => {
   return step;
 };
 
+const createResults = (results: RlseStepResult[] = []): RlseResults => {
+  Object.defineProperty(results, "findStep", {
+    value(step: string) {
+      const result = results.findLast((item) => item.step === step);
+
+      if (!result) {
+        throw new Error(`${step} result was not found`);
+      }
+
+      return result.value;
+    },
+  });
+
+  return results as RlseResults;
+};
+
+type RlseInitialContext = Partial<Omit<RlseContext, "results">> & {
+  results?: RlseStepResult[];
+};
+
 export const runFlow = async (
   flow: RlseFlowStep[],
-  initialContext?: Partial<RlseContext>,
+  initialContext?: RlseInitialContext,
 ) => {
   const context: RlseContext = {
     cwd: process.cwd(),
     dryRun: false,
     ...initialContext,
-    results: [...(initialContext?.results ?? [])],
+    results: createResults([...(initialContext?.results ?? [])]),
   };
   const completedSteps: { step: RlseStep; result: RlseStepResult }[] = [];
 
