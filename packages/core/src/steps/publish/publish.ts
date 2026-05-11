@@ -12,7 +12,7 @@ export const publishNpmPackage = (options: {
     const packageName = resolveOption(options.packageName, context);
     const dryRun = options.dryRun ?? context.dryRun;
 
-    const publishArgs = ["publish", "--workspace", packageName];
+    const publishArgs = ["publish"];
     if (dryRun) {
       publishArgs.push("--dry-run");
     }

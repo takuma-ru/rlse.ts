@@ -10,9 +10,9 @@ export default defineConfig({
   flow: ({ args }) =>
     presets.npmRelease({
       resolvePackage: { name: "vanilla-ts" },
-      calculateNextVersion: { level: args.level },
-      run: "pnpm build",
-      publish: { dryRun: true },
+      calculateNextSemver: { level: args.level },
+      runCommand: "pnpm build",
+      publishNpmPackage: { dryRun: true },
       commit: false,
       push: false,
     }),
