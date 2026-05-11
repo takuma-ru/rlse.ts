@@ -1,27 +1,23 @@
 export type RlseContext = {
   cwd: string;
   dryRun: boolean;
-  packageJsonPath?: string;
-  packageJson?: Record<string, unknown> & {
-    name?: string;
-    version?: string;
-  };
-  packageName?: string;
-  currentVersion?: string;
-  newVersion?: string;
-  versionReset?: () => void;
-  committed?: boolean;
-  published?: boolean;
-  baseBranch?: string;
-  releaseBranch?: string;
+  results: RlseStepResult[];
 };
 
-export type RlseStepRunner = (context: RlseContext) => Promise<void> | void;
+export type RlseStepResult = {
+  step: string;
+  value: unknown;
+};
+
+export type RlseStepRunner = (context: RlseContext) => unknown;
 
 export type RlseStep = {
   name: string;
   run: RlseStepRunner;
-  rollback?: RlseStepRunner;
+  rollback?: (
+    context: RlseContext,
+    result: RlseStepResult,
+  ) => Promise<void> | void;
 };
 
 export type RlseFlowStep = RlseStep | RlseStepRunner;

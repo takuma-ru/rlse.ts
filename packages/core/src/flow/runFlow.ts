@@ -1,4 +1,9 @@
-import type { RlseContext, RlseFlowStep, RlseStep } from "./types";
+import type {
+  RlseContext,
+  RlseFlowStep,
+  RlseStep,
+  RlseStepResult,
+} from "./types";
 
 const normalizeStep = (step: RlseFlowStep): RlseStep => {
   if (typeof step === "function") {
@@ -18,19 +23,22 @@ export const runFlow = async (
   const context: RlseContext = {
     cwd: process.cwd(),
     dryRun: false,
+    results: [],
     ...initialContext,
   };
-  const completedSteps: RlseStep[] = [];
+  const completedSteps: { step: RlseStep; result: RlseStepResult }[] = [];
 
   try {
     for (const flowStep of flow) {
       const step = normalizeStep(flowStep);
-      await step.run(context);
-      completedSteps.push(step);
+      const value = await step.run(context);
+      const result = { step: step.name, value };
+      context.results.push(result);
+      completedSteps.push({ step, result });
     }
   } catch (error) {
-    for (const step of completedSteps.reverse()) {
-      await step.rollback?.(context);
+    for (const { step, result } of completedSteps.reverse()) {
+      await step.rollback?.(context, result);
     }
 
     throw error;

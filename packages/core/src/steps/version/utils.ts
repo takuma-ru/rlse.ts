@@ -10,11 +10,15 @@ export const resolveNextVersion = ({
   pre,
 }: {
   currentVersion: string;
-  packageJson: PackageJson;
+  packageJson?: PackageJson;
   options: VersionOptions;
   pre: boolean;
 }) => {
   if (typeof options.version === "function") {
+    if (!packageJson) {
+      throw new Error("Package JSON is required for version resolver");
+    }
+
     return options.version({
       currentVersion,
       packageJson: { ...packageJson },

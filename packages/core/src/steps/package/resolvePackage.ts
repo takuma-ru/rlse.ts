@@ -4,7 +4,7 @@ import { readPackageJson } from "./utils";
 
 export const resolvePackage = (options: { name: string }): RlseStep => ({
   name: "resolvePackage",
-  run: async (context) => {
+  run: async () => {
     const packageJsonPath = await findPackageJsonByName(options.name);
 
     if (!packageJsonPath) {
@@ -13,8 +13,10 @@ export const resolvePackage = (options: { name: string }): RlseStep => ({
 
     const packageJson = readPackageJson(packageJsonPath);
 
-    context.packageJsonPath = packageJsonPath;
-    context.packageJson = packageJson;
-    context.packageName = packageJson.name;
+    return {
+      packageJsonPath,
+      packageJson,
+      packageName: packageJson.name,
+    };
   },
 });

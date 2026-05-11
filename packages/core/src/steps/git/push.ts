@@ -1,30 +1,30 @@
 import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
-import { getCurrentBranch } from "./utils";
 
-export const push = (options?: {
-  branch?: string | ((context: Parameters<RlseStep["run"]>[0]) => string);
+export const push = (options: {
+  branch: string;
+  remote?: string;
   setUpstream?: boolean;
 }): RlseStep => ({
   name: "push",
-  run: (context) => {
-    const targetBranch =
-      typeof options?.branch === "function"
-        ? options.branch(context)
-        : (options?.branch ??
-          context.releaseBranch ??
-          context.baseBranch ??
-          getCurrentBranch());
+  run: () => {
+    const remote = options.remote ?? "origin";
     const args = options?.setUpstream
-      ? ["push", "--set-upstream", "origin", targetBranch]
-      : ["push", "origin", targetBranch];
+      ? ["push", "--set-upstream", remote, options.branch]
+      : ["push", remote, options.branch];
 
     cmdFile("git", args, {
       successCallback: (stdout) => {
-        consola.success(`Pushed to ${targetBranch}`);
+        consola.success(`Pushed to ${options.branch}`);
         return stdout;
       },
     });
+
+    return {
+      branch: options.branch,
+      remote,
+      setUpstream: options.setUpstream ?? false,
+    };
   },
 });

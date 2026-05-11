@@ -2,23 +2,20 @@ import { valid } from "semver";
 import type { RlseStep } from "../../flow/types";
 import { resolveNextVersion } from "./utils";
 import type { VersionOptions } from "./types";
+import { resolveOption } from "../resolveOption";
 
-export const calculateNextVersion = (
-  options: VersionOptions = {},
-): RlseStep => ({
-  name: "calculateNextVersion",
+export const calculateNextSemver = (options: VersionOptions): RlseStep => ({
+  name: "calculateNextSemver",
   run: (context) => {
-    if (!context.packageJson) {
-      throw new Error("Package must be resolved before calculateNextVersion");
-    }
-
-    const currentVersion =
-      context.currentVersion ?? context.packageJson.version ?? "0.0.0";
+    const currentVersion = resolveOption(options.currentVersion, context);
+    const packageJson = options.packageJson
+      ? resolveOption(options.packageJson, context)
+      : undefined;
     const pre = options.pre ?? false;
 
     const nextVersion = resolveNextVersion({
       currentVersion,
-      packageJson: context.packageJson,
+      packageJson,
       options,
       pre,
     });
@@ -27,7 +24,11 @@ export const calculateNextVersion = (
       throw new Error(`Invalid version: ${nextVersion}`);
     }
 
-    context.currentVersion = currentVersion;
-    context.newVersion = nextVersion;
+    return {
+      currentVersion,
+      nextVersion,
+      level: options.level,
+      pre,
+    };
   },
 });

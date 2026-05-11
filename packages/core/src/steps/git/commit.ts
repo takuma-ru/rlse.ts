@@ -3,44 +3,41 @@ import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
 import { getStagedFiles } from "./utils";
 
-export const commit = (options?: {
-  message?: string | ((context: Parameters<RlseStep["run"]>[0]) => string);
+export const commit = (options: {
+  message: string;
+  skipIfNoChanges?: boolean;
 }): RlseStep => ({
   name: "commit",
-  run: (context) => {
-    const stagedFiles = getStagedFiles();
-    if (!stagedFiles) {
+  run: () => {
+    const stagedFiles = getStagedFiles()
+      .split("\n")
+      .filter((file) => file.length > 0);
+    if (!stagedFiles.length) {
+      if (!options.skipIfNoChanges) {
+        throw new Error("No changes to commit");
+      }
+
       consola.info("No changes to commit");
-      return;
+
+      return {
+        message: options.message,
+        committed: false,
+        stagedFiles,
+        reason: "no_changes",
+      };
     }
 
-    const message = resolveCommitMessage(context, options?.message);
-
-    cmdFile("git", ["commit", "-m", message], {
+    cmdFile("git", ["commit", "-m", options.message], {
       successCallback: (stdout) => {
-        context.committed = true;
-        consola.success(`Committed ${message}`);
+        consola.success(`Committed ${options.message}`);
         return stdout;
       },
     });
+
+    return {
+      message: options.message,
+      committed: true,
+      stagedFiles,
+    };
   },
 });
-
-const resolveCommitMessage = (
-  context: Parameters<RlseStep["run"]>[0],
-  message?: string | ((context: Parameters<RlseStep["run"]>[0]) => string),
-) => {
-  if (typeof message === "function") {
-    return message(context);
-  }
-
-  if (message) {
-    return message;
-  }
-
-  if (context.packageName && context.newVersion) {
-    return `Release ${context.packageName} ${context.newVersion}`;
-  }
-
-  return "Release changes";
-};

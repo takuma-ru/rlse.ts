@@ -9,12 +9,12 @@ export default defineConfig({
   }),
   flow: ({ args }) =>
     presets.npmRelease({
-      configureGit: {
+      configureGitUser: {
         name: "github-actions[bot]",
         email: "41898282+github-actions[bot]@users.noreply.github.com",
       },
       resolvePackage: { name: "@takuma-ru/rlse" },
-      calculateNextVersion: { level: args.level },
-      run: "pnpm build",
+      calculateNextSemver: { level: args.level },
+      runCommand: "pnpm build",
     }),
 });

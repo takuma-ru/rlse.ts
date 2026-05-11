@@ -43,8 +43,21 @@ test("uses version generator from rlse config", () => {
 
 export default defineConfig([
   steps.resolvePackage({ name: "rlse-config-version-fixture" }),
-  steps.bumpVersion({
+  steps.calculateNextSemver({
+    currentVersion: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage").value.packageJson
+        .version,
+    packageJson: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage").value.packageJson,
     version: ({ currentVersion, inc }) => inc(currentVersion, "minor"),
+  }),
+  steps.writePackageVersion({
+    packageJsonPath: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage").value
+        .packageJsonPath,
+    version: ({ results }) =>
+      results.findLast(({ step }) => step === "calculateNextSemver").value
+        .nextVersion,
   }),
 ]);\n`,
     );
@@ -74,7 +87,20 @@ test("runs configured flow steps", () => {
 
 export default defineConfig([
   steps.resolvePackage({ name: "rlse-config-version-fixture" }),
-  steps.bumpVersion({ version: "2.0.0" }),
+  steps.calculateNextSemver({
+    currentVersion: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage").value.packageJson
+        .version,
+    version: "2.0.0",
+  }),
+  steps.writePackageVersion({
+    packageJsonPath: ({ results }) =>
+      results.findLast(({ step }) => step === "resolvePackage").value
+        .packageJsonPath,
+    version: ({ results }) =>
+      results.findLast(({ step }) => step === "calculateNextSemver").value
+        .nextVersion,
+  }),
 ]);\n`,
     );
 
@@ -107,7 +133,20 @@ export default defineConfig({
   }),
   flow: ({ args }) => [
     steps.resolvePackage({ name: "rlse-config-version-fixture" }),
-    steps.bumpVersion({ level: args.level }),
+    steps.calculateNextSemver({
+      currentVersion: ({ results }) =>
+        results.findLast(({ step }) => step === "resolvePackage").value
+          .packageJson.version,
+      level: args.level,
+    }),
+    steps.writePackageVersion({
+      packageJsonPath: ({ results }) =>
+        results.findLast(({ step }) => step === "resolvePackage").value
+          .packageJsonPath,
+      version: ({ results }) =>
+        results.findLast(({ step }) => step === "calculateNextSemver").value
+          .nextVersion,
+    }),
   ],
 });\n`,
     );
@@ -138,8 +177,8 @@ test("uses npm release preset", () => {
 export default defineConfig(
   presets.npmRelease({
     resolvePackage: { name: "rlse-config-version-fixture" },
-    calculateNextVersion: { version: "3.0.0" },
-    publish: false,
+    calculateNextSemver: { version: "3.0.0" },
+    publishNpmPackage: false,
     commit: false,
     push: false,
   }),
@@ -159,4 +198,24 @@ export default defineConfig(
   } finally {
     rmSync(projectDir, { recursive: true, force: true });
   }
+});
+
+test("collects flow step results", async () => {
+  const { runFlow } = await import(publicApiPath);
+
+  const context = await runFlow([
+    {
+      name: "first",
+      run: () => ({ ok: true }),
+    },
+    {
+      name: "second",
+      run: ({ results }) => ({ previousStep: results[0].step }),
+    },
+  ]);
+
+  assert.deepEqual(context.results, [
+    { step: "first", value: { ok: true } },
+    { step: "second", value: { previousStep: "first" } },
+  ]);
 });

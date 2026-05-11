@@ -1,15 +1,16 @@
 import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
+import { resolveOption, type Resolvable } from "../resolveOption";
 
-export const stageFiles = (options?: { paths?: string[] }): RlseStep => ({
+export const stageFiles = (options: {
+  paths: Resolvable<string[]>;
+}): RlseStep => ({
   name: "stageFiles",
   run: (context) => {
-    const paths =
-      options?.paths ??
-      (context.packageJsonPath ? [context.packageJsonPath] : undefined);
+    const paths = resolveOption(options.paths, context);
 
-    if (!paths?.length) {
+    if (!paths.length) {
       throw new Error("Files must be provided before stageFiles");
     }
 
@@ -19,5 +20,9 @@ export const stageFiles = (options?: { paths?: string[] }): RlseStep => ({
         return stdout;
       },
     });
+
+    return {
+      paths,
+    };
   },
 });
