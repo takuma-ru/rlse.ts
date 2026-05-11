@@ -8,13 +8,29 @@ export const push = (options: {
   setUpstream?: boolean;
 }): RlseStep => ({
   name: "push",
-  run: () => {
+  run: (context) => {
     const remote = options.remote ?? "origin";
     const args = options?.setUpstream
       ? ["push", "--set-upstream", remote, options.branch]
       : ["push", remote, options.branch];
 
+    if (context.dryRun) {
+      consola.info(`[dry-run] Skip git ${args.join(" ")}`);
+
+      return {
+        branch: options.branch,
+        remote,
+        setUpstream: options.setUpstream ?? false,
+        dryRun: true,
+        pushed: false,
+      };
+    }
+
     cmdFile("git", args, {
+      execOptions: {
+        cwd: context.cwd,
+        encoding: "utf8",
+      },
       successCallback: (stdout) => {
         consola.success(`Pushed to ${options.branch}`);
         return stdout;
@@ -25,6 +41,8 @@ export const push = (options: {
       branch: options.branch,
       remote,
       setUpstream: options.setUpstream ?? false,
+      dryRun: false,
+      pushed: true,
     };
   },
 });

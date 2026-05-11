@@ -17,7 +17,8 @@ const main = async () => {
   program
     .name("rlse")
     .description("Release npm package")
-    .version(thisPackageVersion);
+    .version(thisPackageVersion)
+    .option("--dry-run", "Run the flow without applying mutations");
 
   const argSchemas = getArgSchemas(config);
 
@@ -26,7 +27,7 @@ const main = async () => {
   }
 
   program.action(async (args) => {
-    await releaseAction(config, args);
+    await releaseAction(config, args, { dryRun: args.dryRun ?? false });
   });
 
   program.parse();

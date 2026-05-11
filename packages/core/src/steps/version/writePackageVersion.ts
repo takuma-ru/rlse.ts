@@ -15,6 +15,17 @@ export const writePackageVersion = (options: {
     const packageJson = readPackageJson(packageJsonPath);
     const previousVersion = packageJson.version;
 
+    if (context.dryRun) {
+      consola.info(`[dry-run] Skip writing ${version} to ${packageJsonPath}`);
+
+      return {
+        packageJsonPath,
+        previousVersion,
+        version,
+        dryRun: true,
+      };
+    }
+
     packageJson.version = version;
     writePackageJson(packageJsonPath, packageJson);
 
@@ -26,6 +37,7 @@ export const writePackageVersion = (options: {
       packageJsonPath,
       previousVersion,
       version,
+      dryRun: false,
     };
   },
   rollback: (context, result) => {
@@ -56,7 +68,7 @@ export const writePackageVersion = (options: {
       return;
     }
 
-    if (!isWritePackageVersionResult(result.value)) {
+    if (!isWritePackageVersionResult(result.value) || result.value.dryRun) {
       return;
     }
 
@@ -73,6 +85,7 @@ const isWritePackageVersionResult = (
   packageJsonPath: string;
   previousVersion: string | undefined;
   version: string;
+  dryRun: boolean;
 } => {
   return (
     typeof value === "object" &&
@@ -80,6 +93,8 @@ const isWritePackageVersionResult = (
     "packageJsonPath" in value &&
     typeof value.packageJsonPath === "string" &&
     "version" in value &&
-    typeof value.version === "string"
+    typeof value.version === "string" &&
+    "dryRun" in value &&
+    typeof value.dryRun === "boolean"
   );
 };
