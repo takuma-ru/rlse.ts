@@ -6,13 +6,15 @@ export const preContainer = css`
   margin: 1rem 0;
   background-color: var(--background-secondary);
   border-radius: 0.5em;
+  border: 2px solid;
+  border-color: var(--color-400);
 `;
 
 export const metaContainer = css`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0.5rem 1rem 0;
+  margin: 0.5rem 1rem;
 `;
 
 export const fileNameText = css`
@@ -23,7 +25,7 @@ export const fileNameText = css`
 
 export const langText = css`
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
   align-items: center;
   color: var(--text-secondary);
   font-size: 0.8rem;
@@ -63,7 +65,9 @@ export const pre = css`
   overflow: auto;
   padding: 1rem;
   margin: 0;
-  border: 1px solid;
-  border-color: transparent;
+  border: 2px solid;
+  border-width: 2px 0 0 0;
+  border-color: var(--color-400);
   border-radius: 0 0 0.5em 0.5em;
+  font-size: 0.85rem;
 `;

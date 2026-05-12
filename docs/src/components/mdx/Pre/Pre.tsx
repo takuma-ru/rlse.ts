@@ -1,7 +1,14 @@
 import clsx from "clsx";
 import type { JSX } from "hono/jsx";
-import { fileNameText, langText, metaContainer, pre, preContainer } from "./Pre.css";
+import {
+  fileNameText,
+  langText,
+  metaContainer,
+  pre,
+  preContainer,
+} from "./Pre.css";
 import { LangIcon } from "./utils/LangIcon";
+import { cx } from "hono/css";
 
 type Props = JSX.IntrinsicElements["pre"] & {
   lang?: string;
@@ -20,7 +27,7 @@ export const Pre = ({ children, className, lang, ...attr }: Props) => {
           <LangIcon lang={lang} />
         </span>
       </div>
-      <pre {...attr} lang={lang} className={clsx(pre, className)}>
+      <pre {...attr} lang={lang} className={cx(pre, className)}>
         {/* {lang === "shell" && <span className={promptText}>$</span>} */}
         {children}
       </pre>
