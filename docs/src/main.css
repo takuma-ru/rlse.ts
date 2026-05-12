@@ -14,71 +14,27 @@
   /* Base Color */
   --color-base: #ae6bff;
 
-  /* Tints - Lighter variations */
-  --color-tint-50: #b170ff;
-  --color-tint-100: #b376ff;
-  --color-tint-150: #b67bff;
-  --color-tint-200: #b980ff;
-  --color-tint-250: #bc85ff;
-  --color-tint-300: #bf8bff;
-  --color-tint-350: #c290ff;
-  --color-tint-400: #c595ff;
-  --color-tint-450: #c89aff;
-  --color-tint-500: #cba0ff;
-  --color-tint-550: #cda5ff;
-  --color-tint-600: #d0aaff;
-  --color-tint-650: #d3afff;
-  --color-tint-700: #d6b5ff;
-  --color-tint-750: #d9baff;
-  --color-tint-800: #dcbfff;
-  --color-tint-850: #dfc4ff;
-  --color-tint-900: #e2caff;
-  --color-tint-950: #e4cfff;
-  --color-tint-1000: #e7d4ff;
-
-  /* Shades - Darker variations */
-  --color-shade-50: #a65cff;
-  --color-shade-100: #9d4dff;
-  --color-shade-150: #953fff;
-  --color-shade-200: #8d30ff;
-  --color-shade-250: #8521ff;
-  --color-shade-300: #7d12ff;
-  --color-shade-350: #7503ff;
-  --color-shade-400: #6e00f4;
-  --color-shade-450: #6700e5;
-  --color-shade-500: #6000d6;
-  --color-shade-550: #5a00c7;
-  --color-shade-600: #5300b8;
-  --color-shade-650: #4c00aa;
-  --color-shade-700: #46009b;
-  --color-shade-750: #3f008c;
-  --color-shade-800: #38007d;
-  --color-shade-850: #32006e;
-  --color-shade-900: #2b005f;
-  --color-shade-950: #240051;
-  --color-shade-1000: #1e0042;
-
   /* Schema scale (50-1000) */
-  --color-50: var(--color-tint-1000);
-  --color-100: var(--color-tint-950);
-  --color-150: var(--color-tint-900);
-  --color-200: var(--color-tint-850);
-  --color-250: var(--color-tint-800);
-  --color-300: var(--color-tint-750);
-  --color-350: var(--color-tint-700);
-  --color-400: var(--color-tint-650);
-  --color-450: var(--color-tint-600);
-  --color-500: var(--color-tint-550);
-  --color-550: var(--color-tint-500);
-  --color-600: var(--color-tint-450);
-  --color-650: var(--color-base);
-  --color-700: var(--color-shade-100);
-  --color-750: var(--color-shade-250);
-  --color-800: var(--color-shade-400);
-  --color-850: var(--color-shade-550);
-  --color-900: var(--color-shade-700);
-  --color-950: var(--color-shade-850);
-  --color-1000: var(--color-shade-1000);
+  --color-50: #fdfaff;
+  --color-100: #f2e6ff;
+  --color-150: #e6d1ff;
+  --color-200: #dbbdff;
+  --color-250: #d0a8ff;
+  --color-300: #c594ff;
+  --color-350: #b97fff;
+  --color-400: #ae6bff;
+  --color-450: #a162ec;
+  --color-500: #9459da;
+  --color-550: #8850c7;
+  --color-600: #7b47b4;
+  --color-650: #6e3ea2;
+  --color-700: #61368f;
+  --color-750: #542d7c;
+  --color-800: #47246a;
+  --color-850: #3b1b57;
+  --color-900: #2e1244;
+  --color-950: #210932;
+  --color-1000: #14001f;
 }
 
 * {
@@ -142,42 +98,42 @@ td {
 
 @media (prefers-color-scheme: light) {
   :root {
-    --background-primary: var(--color-tint-950);
-    --background-secondary: var(--color-tint-900);
-    --text-primary: var(--color-shade-1000);
-    --text-secondary: var(--color-shade-600);
+    --background-primary: var(--color-100);
+    --background-secondary: var(--color-150);
+    --text-primary: var(--color-1000);
+    --text-secondary: var(--color-700);
     --text-highlight: var(--color-base);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-50: var(--color-shade-1000);
-    --color-100: var(--color-shade-850);
-    --color-150: var(--color-shade-700);
-    --color-200: var(--color-shade-550);
-    --color-250: var(--color-shade-400);
-    --color-300: var(--color-shade-250);
-    --color-350: var(--color-shade-100);
-    --color-400: var(--color-base);
-    --color-450: var(--color-tint-450);
-    --color-500: var(--color-tint-500);
-    --color-550: var(--color-tint-550);
-    --color-600: var(--color-tint-600);
-    --color-650: var(--color-tint-650);
-    --color-700: var(--color-tint-700);
-    --color-750: var(--color-tint-750);
-    --color-800: var(--color-tint-800);
-    --color-850: var(--color-tint-850);
-    --color-900: var(--color-tint-900);
-    --color-950: var(--color-tint-950);
-    --color-1000: var(--color-tint-1000);
+    --color-50: #14001f;
+    --color-100: #210932;
+    --color-150: #2e1244;
+    --color-200: #3b1b57;
+    --color-250: #47246a;
+    --color-300: #542d7c;
+    --color-350: #61368f;
+    --color-400: #6e3ea2;
+    --color-450: #7b47b4;
+    --color-500: #8850c7;
+    --color-550: #9459da;
+    --color-600: #a162ec;
+    --color-650: #ae6bff;
+    --color-700: #b97fff;
+    --color-750: #c594ff;
+    --color-800: #d0a8ff;
+    --color-850: #dbbdff;
+    --color-900: #e6d1ff;
+    --color-950: #f2e6ff;
+    --color-1000: #fdfaff;
 
-    --background-primary: var(--color-shade-1000);
-    --background-secondary: var(--color-shade-900);
-    --text-primary: var(--color-tint-1000);
-    --text-secondary: var(--color-tint-700);
-    --text-highlight: var(--color-tint-500);
+    --background-primary: var(--color-50);
+    --background-secondary: var(--color-100);
+    --text-primary: var(--color-1000);
+    --text-secondary: var(--color-700);
+    --text-highlight: var(--color-500);
   }
 
   .shiki,

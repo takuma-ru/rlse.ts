@@ -7,7 +7,7 @@ export const preContainer = css`
   background-color: var(--background-secondary);
   border-radius: 0.5em;
   border: 2px solid;
-  border-color: var(--color-400);
+  border-color: var(--color-300);
 `;
 
 export const metaContainer = css`
@@ -67,7 +67,7 @@ export const pre = css`
   margin: 0;
   border: 2px solid;
   border-width: 2px 0 0 0;
-  border-color: var(--color-400);
+  border-color: var(--color-300);
   border-radius: 0 0 0.5em 0.5em;
   font-size: 0.85rem;
 `;
