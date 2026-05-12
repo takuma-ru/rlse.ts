@@ -1,8 +1,7 @@
-import { style } from "@vanilla-extract/css";
+import { css } from "hono/css";
 
-export const footer = style({
-  padding: "2rem 1rem 1rem",
-  textAlign: "center",
-  fontWeight: "lighter",
-  // borderTop: `1px solid ${colors.background.secondary}`,
-});
+export const footer = css`
+  padding: 2rem 1rem 1rem;
+  text-align: center;
+  font-weight: lighter;
+`;

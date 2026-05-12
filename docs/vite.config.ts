@@ -3,7 +3,6 @@ import build from "@hono/vite-build/cloudflare-workers";
 import devServer from "@hono/vite-dev-server";
 import cloudflareAdapter from "@hono/vite-dev-server/cloudflare";
 import rehypeShiki, { type RehypeShikiOptions } from "@shikijs/rehype";
-import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import remarkGfm from "remark-gfm";
 import Fonts from "unplugin-fonts/vite";
 import { defineConfig } from "vite";
@@ -12,7 +11,6 @@ import { rehypeInlineCodeLang } from "./config/rehypeInlineCodeLang";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const commonPlugins = [
-    vanillaExtractPlugin(),
     Fonts({
       google: {
         families: [{ name: "Open Sans", styles: "wght@0,300..800;1,300..800" }],

@@ -27,12 +27,8 @@
   },
   "engines": {
     "npm": "please_use_pnpm_instead",
-    "pnpm": "9.5.0",
+    "pnpm": "11.1.0",
     "yarn": "please_use_pnpm_instead"
   },
-  "volta": {
-    "node": "24.11.1",
-    "pnpm": "9.5.0"
-  },
-  "packageManager": "pnpm@9.5.0"
+  "packageManager": "pnpm@11.1.0"
 }

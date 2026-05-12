@@ -18,7 +18,6 @@
   "dependencies": {
     "@mdx-js/rollup": "^3.0.1",
     "@types/mdx": "^2.0.13",
-    "@vanilla-extract/css": "^1.15.3",
     "clsx": "^2.1.1",
     "github-markdown-css": "^5.6.1",
     "hono": "^4.6.3",
@@ -31,7 +30,6 @@
     "@shikijs/rehype": "^1.12.1",
     "@types/hast": "^3.0.4",
     "@types/unist": "^3.0.3",
-    "@vanilla-extract/vite-plugin": "^4.0.13",
     "globals": "^15.9.0",
     "hast": "^1.0.0",
     "typescript": "^5.5.3",

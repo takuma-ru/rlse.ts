@@ -1,35 +1,34 @@
-import { style } from "@vanilla-extract/css";
-import { colors } from "../../../theme.css";
+import { css } from "hono/css";
 
-export const header = style({
-  position: "fixed",
-  zIndex: "calc(infinity)",
-  width: "100%",
-  height: 64,
-  top: 0,
-  left: 0,
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  padding: "1rem",
-  backgroundColor: `color-mix(in srgb, ${colors.background.primary} 80%, transparent)`,
-  backdropFilter: "blur(4px)",
-  WebkitBackdropFilter: "blur(4px)",
-  borderBottom: `1px solid ${colors.background.secondary}`,
-});
+export const header = css`
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  height: 64px;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: color-mix(in srgb, var(--background-primary) 80%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-bottom: 1px solid var(--background-secondary);
+`;
 
-export const titleAnchor = style({
-  textDecoration: "none",
-});
+export const titleAnchor = css`
+  text-decoration: none;
+`;
 
-export const titleText = style({
-  color: colors.text.primary,
-  fontWeight: "bold",
-  margin: 0,
-});
+export const titleText = css`
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 0;
+`;
 
-export const links = style({
-  display: "flex",
-  alignItems: "center",
-  gap: "1rem",
-});
+export const links = css`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;

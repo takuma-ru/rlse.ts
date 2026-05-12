@@ -1,30 +1,26 @@
-import { style } from "@vanilla-extract/css";
-import { colors } from "../../theme.css";
+import { css } from "hono/css";
 
-export const base = style({
-  color: colors.text.primary,
-  backgroundColor: colors.background.secondary,
-  padding: "0.5em 1.5em",
-  borderRadius: "0.5em",
-  textAlign: "center",
-  transition: "transform 0.1s ease-in-out",
-  lineHeight: 1.5,
-  cursor: "pointer",
-  ":active": {
-    transform: "scale(0.95)",
-  },
-});
+export const base = css`
+  color: var(--text-primary);
+  background-color: var(--background-secondary);
+  padding: 0.5em 1.5em;
+  border-radius: 0.5em;
+  text-align: center;
+  transition: transform 0.1s ease-in-out;
+  line-height: 1.5;
+  cursor: pointer;
 
-export const anchor = style([
-  base,
-  {
-    display: "inline-block",
-  },
-]);
+  &:active {
+    transform: scale(0.95);
+  }
+`;
 
-export const button = style([
-  base,
-  {
-    border: "none",
-  },
-]);
+export const anchor = css`
+  ${base}
+  display: inline-block;
+`;
+
+export const button = css`
+  ${base}
+  border: none;
+`;

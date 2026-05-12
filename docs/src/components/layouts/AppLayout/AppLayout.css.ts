@@ -1,7 +1,7 @@
-import { style } from "@vanilla-extract/css";
+import { css } from "hono/css";
 
-export const main = style({
-  padding: "1rem",
-  maxWidth: 800,
-  margin: "64px auto 0",
-});
+export const main = css`
+  padding: 1rem;
+  max-width: 800px;
+  margin: 64px auto 0;
+`;

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { Style } from "hono/css";
 import App from "./App";
 
 const app = new Hono();
@@ -10,6 +11,7 @@ app.get("/", (c) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>@takuma-ru/rlse</title>
+        <Style />
         {import.meta.env.PROD ? (
           <link rel="stylesheet" href="/static/style.css" />
         ) : (
