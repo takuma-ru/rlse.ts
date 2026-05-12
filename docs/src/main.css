@@ -70,20 +70,20 @@ td {
 
 @media (prefers-color-scheme: light) {
   :root {
-    --background-primary: #eeeeee;
-    --background-secondary: #f6f6f6;
-    --text-primary: #1d1d1d;
-    --text-secondary: #bfbfbf;
+    --background-primary: #FDF2FD;
+    --background-secondary: #f0e4f0;
+    --text-primary: #040104;
+    --text-secondary: #6b5a6b;
     --text-highlight: #c66d00ff;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-primary: #1d1d1d;
-    --background-secondary: #2c2c2c;
-    --text-primary: #f6f6f6;
-    --text-secondary: #9b9b9b;
+    --background-primary: #040104;
+    --background-secondary: #1a111a;
+    --text-primary: #FDF2FD;
+    --text-secondary: #b89ab8;
     --text-highlight: #ffa332ff;
   }
 
