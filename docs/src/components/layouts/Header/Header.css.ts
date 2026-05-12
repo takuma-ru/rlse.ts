@@ -11,7 +11,11 @@ export const header = css`
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: color-mix(in srgb, var(--background-primary) 80%, transparent);
+  background-color: color-mix(
+    in srgb,
+    var(--background-primary) 80%,
+    transparent
+  );
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border-bottom: 1px solid var(--background-secondary);

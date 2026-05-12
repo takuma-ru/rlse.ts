@@ -6,6 +6,12 @@ export const inlineCode = css`
   padding: 0.1em 0.3em;
   border-radius: 0.25em;
   font-size: 0.9em;
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
-    Liberation Mono, monospace;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
 `;
