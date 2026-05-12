@@ -1,6 +1,17 @@
 # @takuma-ru/rlse
 
-All-in-one release flow execution package.
+TypeScript release workflow runner with reusable safety steps.
+
+Rlse is for package authors who want release flows to be explicit code, not a
+large CLI preset or a one-off `scripts/release.ts`. Start with a preset, then add
+or reorder typed steps for checks, versioning, publishing, tags, changelogs, and
+GitHub Releases.
+
+- Safer than a one-off `release.ts`: reusable steps, rollback hooks, dry-run, and
+  typed step results.
+- More explicit than `release-it`: the release flow is normal TypeScript code.
+- Lighter than `changesets`: no changeset files or monorepo planner required for
+  simple package releases.
 
 ## Getting Started
 
@@ -240,12 +251,13 @@ release PR that coordinates many packages.
 
 Rlse focuses on explicit TypeScript release flows made from small steps.
 
-| Tool               | Best fit                                            | Difference from Rlse                                                                                   |
-| ------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `semantic-release` | Fully automated CI releases from commit history.    | Rlse does not require Conventional Commits and keeps release logic explicit in code.                   |
-| `release-it`       | Mature interactive or configured release workflows. | Rlse exposes smaller typed primitives and rollback-aware steps instead of a broad plugin-driven CLI.   |
-| `changesets`       | Coordinated monorepo package versioning.            | Rlse does not manage changeset files or dependency graph bumps; use it for explicit per-package flows. |
-| `lerna`            | Monorepo versioning and publishing.                 | Rlse is a release workflow runner, not a monorepo package manager.                                     |
+| Tool                 | Best fit                                            | Difference from Rlse                                                                                       |
+| -------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| One-off `release.ts` | Fully custom project-specific release scripts.      | Rlse keeps the TypeScript control while adding reusable steps, dry-run, rollback hooks, and typed results. |
+| `semantic-release`   | Fully automated CI releases from commit history.    | Rlse does not require Conventional Commits and keeps release logic explicit in code.                       |
+| `release-it`         | Mature interactive or configured release workflows. | Rlse exposes the release flow as TypeScript steps instead of a broad plugin-driven CLI.                    |
+| `changesets`         | Coordinated monorepo package versioning.            | Rlse does not manage changeset files or dependency graph bumps; use it for explicit per-package flows.     |
+| `lerna`              | Monorepo versioning and publishing.                 | Rlse is a release workflow runner, not a monorepo package manager.                                         |
 
 ### defineConfig Types
 
