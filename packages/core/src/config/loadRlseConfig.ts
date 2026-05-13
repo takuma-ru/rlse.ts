@@ -2,11 +2,14 @@ import { execSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
+  readdirSync,
   readFile,
+  readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, extname, resolve } from "node:path";
+import { dirname, extname, join, resolve } from "node:path";
 import { cwd } from "node:process";
 import { promisify } from "node:util";
 import consola from "consola";
@@ -71,9 +74,8 @@ const importTypeScriptConfig = async (filePath: string) => {
       compilerOptions: {
         target: "ESNext",
         useDefineForClassFields: true,
-        module: "commonjs",
-        moduleResolution: "node",
-        ignoreDeprecations: "6.0",
+        module: "ESNext",
+        moduleResolution: "bundler",
         esModuleInterop: true,
         lib: ["ESNext"],
         skipLibCheck: true,
@@ -97,13 +99,14 @@ const importTypeScriptConfig = async (filePath: string) => {
   );
   writeFileSync(
     resolve(tempDir, "package.json"),
-    JSON.stringify({ type: "commonjs" }),
+    JSON.stringify({ type: "module" }),
   );
 
   try {
     execSync(`tsc --project ${customTsConfigPath}`, {
       stdio: "inherit",
     });
+    addJsExtensionsToRelativeImports(tempDir);
     const config = await import(tempFilePath);
 
     return (config.default.default ?? config.default) as RlseConfig;
@@ -113,5 +116,40 @@ const importTypeScriptConfig = async (filePath: string) => {
     throw error;
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
+  }
+};
+
+const addJsExtensionsToRelativeImports = (dir: string) => {
+  for (const entry of readdirSync(dir)) {
+    const filePath = join(dir, entry);
+    const stat = statSync(filePath);
+
+    if (stat.isDirectory()) {
+      addJsExtensionsToRelativeImports(filePath);
+      continue;
+    }
+
+    if (extname(filePath) !== ".js") {
+      continue;
+    }
+
+    const content = readFileSync(filePath, "utf-8");
+    const updatedContent = content.replace(
+      /(from\s+["']|import\s*\(\s*["'])(\.{1,2}\/[^"']+)(["'])/g,
+      (match, prefix: string, importPath: string, suffix: string) => {
+        if (
+          extname(importPath) ||
+          !existsSync(resolve(dirname(filePath), `${importPath}.js`))
+        ) {
+          return match;
+        }
+
+        return `${prefix}${importPath}.js${suffix}`;
+      },
+    );
+
+    if (updatedContent !== content) {
+      writeFileSync(filePath, updatedContent);
+    }
   }
 };
