@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { createRequire } from "node:module";
 import {
   existsSync,
   mkdirSync,
@@ -15,6 +16,7 @@ import { promisify } from "node:util";
 import consola from "consola";
 import type { RlseConfig } from "../types/RlseConfig";
 
+const require = createRequire(import.meta.url);
 const promisifyReadFile = promisify(readFile);
 const configFiles = [
   "rlse.config.ts",
@@ -56,6 +58,7 @@ const importTypeScriptConfig = async (filePath: string) => {
   const tempDir = resolve(cwd(), ".temp");
   const tempFilePath = resolve(tempDir, "rlse.config.js");
   const customTsConfigPath = resolve(tempDir, "tsconfig.json");
+  const nodeTypesRoot = getNodeTypesRoot();
 
   // 一時ディレクトリが存在しない場合は作成する
   try {
@@ -76,6 +79,9 @@ const importTypeScriptConfig = async (filePath: string) => {
         moduleResolution: "bundler",
         esModuleInterop: true,
         lib: ["ESNext"],
+        ...(nodeTypesRoot
+          ? { types: ["node"], typeRoots: [nodeTypesRoot] }
+          : {}),
         skipLibCheck: true,
         noErrorTruncation: true,
         noEmit: false,
@@ -114,6 +120,14 @@ const importTypeScriptConfig = async (filePath: string) => {
     throw error;
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
+  }
+};
+
+const getNodeTypesRoot = () => {
+  try {
+    return dirname(dirname(require.resolve("@types/node/package.json")));
+  } catch {
+    return undefined;
   }
 };
 
