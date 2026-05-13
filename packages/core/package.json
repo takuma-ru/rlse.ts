@@ -12,10 +12,10 @@
   "author": "takuma-ru <takuma-ru@takumaru.dev> (https://github.com/takuma-ru/)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/takuma-ru/rlse"
+    "url": "git+https://github.com/takuma-ru/rlse.git"
   },
   "bin": {
-    "rlse": "./bin/bin.js"
+    "rlse": "bin/bin.js"
   },
   "files": [
     "dist",
