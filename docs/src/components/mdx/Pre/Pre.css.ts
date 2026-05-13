@@ -6,7 +6,7 @@ export const preContainer = css`
   margin: 1rem 0;
   background-color: var(--background-secondary);
   border-radius: 0.5em;
-  border: 2px solid;
+  border: 2px dashed;
   border-color: var(--color-300);
 `;
 
@@ -65,7 +65,7 @@ export const pre = css`
   overflow: auto;
   padding: 1rem;
   margin: 0;
-  border: 2px solid;
+  border: 2px dashed;
   border-width: 2px 0 0 0;
   border-color: var(--color-300);
   border-radius: 0 0 0.5em 0.5em;
