@@ -10,7 +10,10 @@ app.get("/", (c) => {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>rlse.ts</title>
+        <title>
+          rlse.ts - TypeScript release workflow runner with reusable safety
+          steps.
+        </title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
