@@ -1,4 +1,4 @@
-import { defineConfig, presets, z } from "@takuma-ru/rlse";
+import { defineConfig, presets, z } from "release.ts";
 
 export default defineConfig({
   args: z.object({

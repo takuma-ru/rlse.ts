@@ -1,6 +1,6 @@
 {
-  "name": "@takuma-ru/rlse",
-  "version": "0.0.2",
+  "name": "release.ts",
+  "version": "0.0.0",
   "private": false,
   "description": "TypeScript release workflow runner with reusable safety steps.",
   "homepage": "https://github.com/takuma-ru/rlse",
@@ -63,9 +63,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@takuma-ru/rlse": "workspace:*",
     "@types/node": "^20.14.2",
     "@types/semver": "^7.5.8",
+    "release.ts": "workspace:*",
     "tsup": "^8.1.0",
     "typescript": "^5.2.2"
   }

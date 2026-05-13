@@ -4,6 +4,6 @@ type Config = {
 };
 
 export const config = {
-  packageName: "@takuma-ru/rlse",
+  packageName: "release.ts",
   registry: "npm",
 } as const satisfies Config;

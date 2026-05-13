@@ -97,15 +97,15 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
-      '@takuma-ru/rlse':
-        specifier: workspace:*
-        version: 'link:'
       '@types/node':
         specifier: ^20.14.2
         version: 20.14.7
       '@types/semver':
         specifier: ^7.5.8
         version: 7.5.8
+      release.ts:
+        specifier: workspace:*
+        version: 'link:'
       tsup:
         specifier: ^8.1.0
         version: 8.1.0(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@5.5.2))(typescript@5.5.2)
@@ -115,7 +115,7 @@ importers:
 
   playgrounds/vanilla-ts:
     devDependencies:
-      '@takuma-ru/rlse':
+      release.ts:
         specifier: workspace:*
         version: link:../../packages/core
       ts-node:

@@ -13,7 +13,7 @@ export default defineConfig({
         name: "github-actions[bot]",
         email: "41898282+github-actions[bot]@users.noreply.github.com",
       },
-      resolvePackage: { name: "@takuma-ru/rlse" },
+      resolvePackage: { name: "release.ts" },
       calculateNextSemver: { level: args.level },
       runCommand: "pnpm build",
     }),
