@@ -1,6 +1,6 @@
 {
   "name": "release.ts",
-  "version": "0.0.2",
+  "version": "0.0.0",
   "private": false,
   "description": "TypeScript release workflow runner with reusable safety steps.",
   "homepage": "https://github.com/takuma-ru/rlse",
