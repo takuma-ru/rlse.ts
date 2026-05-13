@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "description": "TypeScript release workflow runner with reusable safety steps.",
-  "homepage": "https://github.com/takuma-ru/rlse.ts",
+  "homepage": "https://rlse.takumaru.dev",
   "bugs": {
     "url": "https://github.com/takuma-ru/rlse.ts/issues",
     "email": "takuma-ru@takumaru.dev"
