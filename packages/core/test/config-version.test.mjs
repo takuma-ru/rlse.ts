@@ -365,6 +365,29 @@ export default defineConfig(
   }
 });
 
+test("does not load CommonJS config", () => {
+  const projectDir = createTempProject();
+
+  try {
+    writeFileSync(
+      path.join(projectDir, "rlse.config.cjs"),
+      `module.exports = [];
+`,
+    );
+
+    assert.throws(
+      () =>
+        execFileSync("node", [cliPath], {
+          cwd: projectDir,
+          stdio: "pipe",
+        }),
+      /No configuration file found/,
+    );
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
+
 test("collects flow step results", async () => {
   const { runFlow } = await import(publicApiPath);
 

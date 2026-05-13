@@ -20,7 +20,6 @@ const configFiles = [
   "rlse.config.ts",
   "rlse.config.js",
   "rlse.config.mjs",
-  "rlse.config.cjs",
   "rlse.config.json",
 ];
 
@@ -34,8 +33,7 @@ export const loadRlseConfig = async () => {
           return await importTypeScriptConfig(filePath);
         }
         case ".js":
-        case ".mjs":
-        case ".cjs": {
+        case ".mjs": {
           const config = await import(filePath);
 
           return config.default as RlseConfig;

@@ -40,12 +40,11 @@ npm run rlse
 ## Configure settings via Setting file
 
 Create `rlse.config.ts` in the project root and export a release flow.
-In addition to ts, the following file formats are supported.
+The following ESM config file formats are supported.
 
 - `rlse.config.ts`
 - `rlse.config.js`
-  - `rlse.config.mjs`
-  - `rlse.config.cjs`
+- `rlse.config.mjs`
 - `rlse.config.json`
 
 ### Example
