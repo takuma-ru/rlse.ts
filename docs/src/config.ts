@@ -4,6 +4,6 @@ type Config = {
 };
 
 export const config = {
-  packageName: "release.ts",
+  packageName: "rlse.ts",
   registry: "npm",
 } as const satisfies Config;

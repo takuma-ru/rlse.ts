@@ -16,7 +16,7 @@
     "rlse:test": "pnpm link:core && pnpm exec rlse"
   },
   "devDependencies": {
-    "release.ts": "workspace:*",
+    "rlse.ts": "workspace:*",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vite": "^5.3.5"

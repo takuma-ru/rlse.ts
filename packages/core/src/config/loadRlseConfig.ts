@@ -87,9 +87,7 @@ const importTypeScriptConfig = async (filePath: string) => {
         noUnusedParameters: true,
         noFallthroughCasesInSwitch: true,
         paths: {
-          "release.ts": [
-            resolve(cwd(), "node_modules/release.ts/dist/main.js"),
-          ],
+          "rlse.ts": [resolve(cwd(), "node_modules/rlse.ts/dist/main.js")],
         },
       },
       exclude: ["node_modules"],

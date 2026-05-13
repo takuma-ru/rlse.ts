@@ -17,7 +17,7 @@ export const Header = () => {
           <GithubIcon />
         </a>
         <a
-          href="https://www.npmjs.com/package/release.ts"
+          href="https://www.npmjs.com/package/rlse.ts"
           target="_blank"
           rel="noreferrer"
         >
