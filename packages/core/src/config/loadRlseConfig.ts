@@ -2,12 +2,14 @@ import { execSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
+  readdirSync,
   readFile,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, extname, parse, resolve } from "node:path";
+import { dirname, extname, join, resolve } from "node:path";
 import { cwd } from "node:process";
 import { promisify } from "node:util";
 import consola from "consola";
@@ -18,7 +20,6 @@ const configFiles = [
   "rlse.config.ts",
   "rlse.config.js",
   "rlse.config.mjs",
-  "rlse.config.cjs",
   "rlse.config.json",
 ];
 
@@ -32,8 +33,7 @@ export const loadRlseConfig = async () => {
           return await importTypeScriptConfig(filePath);
         }
         case ".js":
-        case ".mjs":
-        case ".cjs": {
+        case ".mjs": {
           const config = await import(filePath);
 
           return config.default as RlseConfig;
@@ -72,8 +72,8 @@ const importTypeScriptConfig = async (filePath: string) => {
       compilerOptions: {
         target: "ESNext",
         useDefineForClassFields: true,
-        module: "Node16",
-        moduleResolution: "node16",
+        module: "ESNext",
+        moduleResolution: "bundler",
         esModuleInterop: true,
         lib: ["ESNext"],
         skipLibCheck: true,
@@ -97,13 +97,14 @@ const importTypeScriptConfig = async (filePath: string) => {
   );
   writeFileSync(
     resolve(tempDir, "package.json"),
-    JSON.stringify({ type: getPackageType(filePath) }),
+    JSON.stringify({ type: "module" }),
   );
 
   try {
     execSync(`tsc --project ${customTsConfigPath}`, {
       stdio: "inherit",
     });
+    addJsExtensionsToRelativeImports(tempDir);
     const config = await import(tempFilePath);
 
     return (config.default.default ?? config.default) as RlseConfig;
@@ -116,27 +117,37 @@ const importTypeScriptConfig = async (filePath: string) => {
   }
 };
 
-const getPackageType = (filePath: string) => {
-  let currentDir = dirname(filePath);
-  const rootDir = parse(currentDir).root;
+const addJsExtensionsToRelativeImports = (dir: string) => {
+  for (const entry of readdirSync(dir)) {
+    const filePath = join(dir, entry);
+    const stat = statSync(filePath);
 
-  while (true) {
-    const packageJsonPath = resolve(currentDir, "package.json");
-
-    if (existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(
-        readFileSync(packageJsonPath, "utf-8"),
-      ) as {
-        type?: string;
-      };
-
-      return packageJson.type === "module" ? "module" : "commonjs";
+    if (stat.isDirectory()) {
+      addJsExtensionsToRelativeImports(filePath);
+      continue;
     }
 
-    if (currentDir === rootDir) {
-      return "commonjs";
+    if (extname(filePath) !== ".js") {
+      continue;
     }
 
-    currentDir = dirname(currentDir);
+    const content = readFileSync(filePath, "utf-8");
+    const updatedContent = content.replace(
+      /(from\s+["']|import\s*\(\s*["'])(\.{1,2}\/[^"']+)(["'])/g,
+      (match, prefix: string, importPath: string, suffix: string) => {
+        if (
+          extname(importPath) ||
+          !existsSync(resolve(dirname(filePath), `${importPath}.js`))
+        ) {
+          return match;
+        }
+
+        return `${prefix}${importPath}.js${suffix}`;
+      },
+    );
+
+    if (updatedContent !== content) {
+      writeFileSync(filePath, updatedContent);
+    }
   }
 };
