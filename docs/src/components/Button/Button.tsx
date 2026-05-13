@@ -1,7 +1,7 @@
-import clsx from "clsx";
 import type { Child } from "hono/jsx";
 import type { JSX } from "hono/jsx";
 import { anchor, button } from "./Button.css";
+import { cx } from "hono/css";
 
 type Props = { children?: Child } & (AnchorProps | ButtonProps);
 type AnchorProps = { tagType: "a" } & JSX.IntrinsicElements["a"];
@@ -15,7 +15,7 @@ export const Button = (props: Props) => {
       const { children, ...attr } = props;
 
       return (
-        <a {...attr} className={clsx(anchor, attr.className)}>
+        <a {...attr} className={cx(anchor, attr.className)}>
           {children}
         </a>
       );
@@ -24,7 +24,7 @@ export const Button = (props: Props) => {
       const { children, ...attr } = props;
 
       return (
-        <button {...attr} className={clsx(button, attr.className)}>
+        <button {...attr} className={cx(button, attr.className)}>
           {children}
         </button>
       );
