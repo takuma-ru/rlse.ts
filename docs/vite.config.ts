@@ -36,6 +36,9 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    resolve: {
+      preserveSymlinks: true,
+    },
     esbuild: {
       jsx: "automatic",
       jsxImportSource: "hono/jsx",
