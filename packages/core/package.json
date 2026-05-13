@@ -3,16 +3,16 @@
   "version": "0.0.0",
   "private": false,
   "description": "TypeScript release workflow runner with reusable safety steps.",
-  "homepage": "https://github.com/takuma-ru/rlse",
+  "homepage": "https://github.com/takuma-ru/rlse.ts",
   "bugs": {
-    "url": "https://github.com/takuma-ru/rlse/issues",
+    "url": "https://github.com/takuma-ru/rlse.ts/issues",
     "email": "takuma-ru@takumaru.dev"
   },
   "license": "MPL-2.0",
   "author": "takuma-ru <takuma-ru@takumaru.dev> (https://github.com/takuma-ru/)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/takuma-ru/rlse.git"
+    "url": "git+https://github.com/takuma-ru/rlse.ts.git"
   },
   "bin": {
     "rlse": "bin/bin.js"
