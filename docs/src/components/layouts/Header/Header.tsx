@@ -10,7 +10,7 @@ export const Header = () => {
       </a>
       <div className={links}>
         <a
-          href="https://github.com/takuma-ru/rlse"
+          href="https://github.com/takuma-ru/rlse.ts"
           target="_blank"
           rel="noreferrer"
         >
