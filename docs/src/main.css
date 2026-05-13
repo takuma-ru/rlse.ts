@@ -71,8 +71,11 @@ li::marker {
 }
 
 table {
+  display: block;
   margin-block-start: 1em;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
   border-spacing: 0;
   text-align: start;
