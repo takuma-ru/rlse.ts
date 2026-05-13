@@ -67,6 +67,6 @@
     "@types/semver": "^7.5.8",
     "rlse.ts": "workspace:*",
     "tsup": "^8.1.0",
-    "typescript": "^5.2.2"
+    "typescript": "^6.0.3"
   }
 }

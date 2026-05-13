@@ -5,6 +5,7 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable", "ES2022"],
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
     "noErrorTruncation": true,
 
     /* Bundler mode */
