@@ -64,8 +64,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       typescript:
-        specifier: ^5.5.3
-        version: 5.5.4
+        specifier: ^6.0.3
+        version: 6.0.3
       unist:
         specifier: ^0.0.1
         version: 0.0.1
@@ -74,10 +74,10 @@ importers:
         version: 5.0.0
       unplugin-fonts:
         specifier: ^1.1.1
-        version: 1.1.1(vite@5.4.0)
+        version: 1.1.1(vite@5.4.0(@types/node@20.14.7))
       vite:
         specifier: ^5.4.0
-        version: 5.4.0
+        version: 5.4.0(@types/node@20.14.7)
       wrangler:
         specifier: ^4.90.0
         version: 4.90.0
@@ -108,10 +108,10 @@ importers:
         version: 'link:'
       tsup:
         specifier: ^8.1.0
-        version: 8.1.0(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@5.5.2))(typescript@5.5.2)
+        version: 8.1.0(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@6.0.3))(typescript@6.0.3)
       typescript:
-        specifier: ^5.2.2
-        version: 5.5.2
+        specifier: ^6.0.3
+        version: 6.0.3
 
   playgrounds/vanilla-ts:
     devDependencies:
@@ -120,10 +120,10 @@ importers:
         version: link:../../packages/core
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@20.14.7)(typescript@5.5.2)
+        version: 10.9.2(@types/node@20.14.7)(typescript@6.0.3)
       typescript:
-        specifier: ^5.2.2
-        version: 5.5.2
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: ^5.3.5
         version: 5.3.5(@types/node@20.14.7)
@@ -2066,13 +2066,8 @@ packages:
     resolution: {integrity: sha512-/Ftmxd5Mq//a9yMonvmwENNUN65jOVTwhhBPQjEtNZutYT9YKyzydFGLyVM1nzhpLWahQSMamRc/RDBv5EapzA==}
     hasBin: true
 
-  typescript@5.5.2:
-    resolution: {integrity: sha512-NcRtPEOsPFFWjobJEtfihkLCZCXZt/os3zf8nTxjVH3RvTSxjrCamJpbExGvYOF+tFHc3pA65qpdwPbzjohhew==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
-  typescript@5.5.4:
-    resolution: {integrity: sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3903,13 +3898,13 @@ snapshots:
 
   pirates@4.0.6: {}
 
-  postcss-load-config@4.0.2(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@5.5.2)):
+  postcss-load-config@4.0.2(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@6.0.3)):
     dependencies:
       lilconfig: 3.1.2
       yaml: 2.4.5
     optionalDependencies:
       postcss: 8.4.40
-      ts-node: 10.9.2(@types/node@20.14.7)(typescript@5.5.2)
+      ts-node: 10.9.2(@types/node@20.14.7)(typescript@6.0.3)
 
   postcss@8.4.40:
     dependencies:
@@ -4133,7 +4128,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-node@10.9.2(@types/node@20.14.7)(typescript@5.5.2):
+  ts-node@10.9.2(@types/node@20.14.7)(typescript@6.0.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -4147,14 +4142,14 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 5.5.2
+      typescript: 6.0.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
   tslib@2.8.1:
     optional: true
 
-  tsup@8.1.0(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@5.5.2))(typescript@5.5.2):
+  tsup@8.1.0(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@6.0.3))(typescript@6.0.3):
     dependencies:
       bundle-require: 4.2.1(esbuild@0.21.5)
       cac: 6.7.14
@@ -4164,7 +4159,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.2(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@5.5.2))
+      postcss-load-config: 4.0.2(postcss@8.4.40)(ts-node@10.9.2(@types/node@20.14.7)(typescript@6.0.3))
       resolve-from: 5.0.0
       rollup: 4.18.0
       source-map: 0.8.0-beta.0
@@ -4172,7 +4167,7 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       postcss: 8.4.40
-      typescript: 5.5.2
+      typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -4204,9 +4199,7 @@ snapshots:
       turbo-windows-64: 2.0.6
       turbo-windows-arm64: 2.0.6
 
-  typescript@5.5.2: {}
-
-  typescript@5.5.4: {}
+  typescript@6.0.3: {}
 
   undici-types@5.26.5: {}
 
@@ -4260,11 +4253,11 @@ snapshots:
 
   unist@0.0.1: {}
 
-  unplugin-fonts@1.1.1(vite@5.4.0):
+  unplugin-fonts@1.1.1(vite@5.4.0(@types/node@20.14.7)):
     dependencies:
       fast-glob: 3.3.2
       unplugin: 1.12.1
-      vite: 5.4.0
+      vite: 5.4.0(@types/node@20.14.7)
 
   unplugin@1.12.1:
     dependencies:
@@ -4295,12 +4288,13 @@ snapshots:
       '@types/node': 20.14.7
       fsevents: 2.3.3
 
-  vite@5.4.0:
+  vite@5.4.0(@types/node@20.14.7):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.40
       rollup: 4.18.0
     optionalDependencies:
+      '@types/node': 20.14.7
       fsevents: 2.3.3
 
   webidl-conversions@4.0.2: {}

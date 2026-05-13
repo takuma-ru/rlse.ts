@@ -31,7 +31,7 @@
     "@types/unist": "^3.0.3",
     "globals": "^15.9.0",
     "hast": "^1.0.0",
-    "typescript": "^5.5.3",
+    "typescript": "^6.0.3",
     "unist": "^0.0.1",
     "unist-util-visit": "^5.0.0",
     "unplugin-fonts": "^1.1.1",

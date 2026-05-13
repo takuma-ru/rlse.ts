@@ -3,10 +3,11 @@ import {
   existsSync,
   mkdirSync,
   readFile,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, extname, resolve } from "node:path";
+import { dirname, extname, parse, resolve } from "node:path";
 import { cwd } from "node:process";
 import { promisify } from "node:util";
 import consola from "consola";
@@ -71,8 +72,8 @@ const importTypeScriptConfig = async (filePath: string) => {
       compilerOptions: {
         target: "ESNext",
         useDefineForClassFields: true,
-        module: "commonjs",
-        moduleResolution: "node",
+        module: "Node16",
+        moduleResolution: "node16",
         esModuleInterop: true,
         lib: ["ESNext"],
         skipLibCheck: true,
@@ -96,7 +97,7 @@ const importTypeScriptConfig = async (filePath: string) => {
   );
   writeFileSync(
     resolve(tempDir, "package.json"),
-    JSON.stringify({ type: "commonjs" }),
+    JSON.stringify({ type: getPackageType(filePath) }),
   );
 
   try {
@@ -112,5 +113,30 @@ const importTypeScriptConfig = async (filePath: string) => {
     throw error;
   } finally {
     rmSync(tempDir, { recursive: true, force: true });
+  }
+};
+
+const getPackageType = (filePath: string) => {
+  let currentDir = dirname(filePath);
+  const rootDir = parse(currentDir).root;
+
+  while (true) {
+    const packageJsonPath = resolve(currentDir, "package.json");
+
+    if (existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(
+        readFileSync(packageJsonPath, "utf-8"),
+      ) as {
+        type?: string;
+      };
+
+      return packageJson.type === "module" ? "module" : "commonjs";
+    }
+
+    if (currentDir === rootDir) {
+      return "commonjs";
+    }
+
+    currentDir = dirname(currentDir);
   }
 };
