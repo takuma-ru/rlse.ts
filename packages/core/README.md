@@ -1,6 +1,6 @@
 # rlse.ts
 
-TypeScript release workflow runner with reusable safety steps.
+**TypeScript release workflow runner with reusable safety steps.**
 
 Rlse is for package authors who want release flows to be explicit code, not a
 large CLI preset or a one-off `scripts/release.ts`. Start with a preset, then add
