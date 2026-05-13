@@ -87,9 +87,7 @@ const importTypeScriptConfig = async (filePath: string) => {
         noUnusedParameters: true,
         noFallthroughCasesInSwitch: true,
         paths: {
-          "@takuma-ru/rlse": [
-            resolve(cwd(), "node_modules/@takuma-ru/rlse/dist/main.js"),
-          ],
+          "release.ts": [resolve(cwd(), "node_modules/release.ts/dist/main.js")],
         },
       },
       exclude: ["node_modules"],

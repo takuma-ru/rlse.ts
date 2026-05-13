@@ -1,4 +1,4 @@
-# @takuma-ru/rlse
+# release.ts
 
 TypeScript release workflow runner with reusable safety steps.
 
@@ -18,7 +18,7 @@ GitHub Releases.
 ### 1. Install
 
 ```shell
-npm install @takuma-ru/rlse
+npm install release.ts
 ```
 
 ### 2. Add script to package.json
@@ -51,7 +51,7 @@ In addition to ts, the following file formats are supported.
 ### Example
 
 ```ts filename=rlse.config.ts
-import { defineConfig, presets } from "@takuma-ru/rlse";
+import { defineConfig, presets } from "release.ts";
 
 export default defineConfig(
   presets.npmRelease({
@@ -70,7 +70,7 @@ around it when your release needs extra side effects, such as GitHub Releases or
 changelog updates.
 
 ```ts filename=rlse.config.ts
-import { defineConfig, presets, steps } from "@takuma-ru/rlse";
+import { defineConfig, presets, steps } from "release.ts";
 
 export default defineConfig([
   steps.checkCleanWorkingTree(),
@@ -87,7 +87,7 @@ export default defineConfig([
 Use primitives directly only when you need full control over every side effect.
 
 ```ts filename=rlse.config.ts
-import { defineConfig, steps } from "@takuma-ru/rlse";
+import { defineConfig, steps } from "release.ts";
 
 export default defineConfig([
   steps.resolvePackage({ name: "vanilla-ts" }),
@@ -210,7 +210,7 @@ Custom steps can be added with `(context) => { ... }`.
 CLI arguments can be declared with Zod in config and used when building the flow.
 
 ```ts filename=rlse.config.ts
-import { defineConfig, presets, z } from "@takuma-ru/rlse";
+import { defineConfig, presets, z } from "release.ts";
 
 export default defineConfig({
   args: z.object({
