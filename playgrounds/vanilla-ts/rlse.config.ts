@@ -1,4 +1,4 @@
-import { defineConfig, presets, z } from "release.ts";
+import { defineConfig, presets, z } from "rlse.ts";
 
 export default defineConfig({
   args: z.object({
