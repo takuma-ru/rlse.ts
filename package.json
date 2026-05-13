@@ -26,7 +26,6 @@
     "turbo": "^2.0.6"
   },
   "engines": {
-    "node": ">=22.13",
     "npm": "please_use_pnpm_instead",
     "pnpm": "11.1.0",
     "yarn": "please_use_pnpm_instead"
