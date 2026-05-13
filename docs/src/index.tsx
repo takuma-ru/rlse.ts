@@ -11,6 +11,16 @@ app.get("/", (c) => {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>@takuma-ru/rlse</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Intel+One+Mono:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <Style />
         {import.meta.env.PROD ? (
           <link rel="stylesheet" href="/static/style.css" />

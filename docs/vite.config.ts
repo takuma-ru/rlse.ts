@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
   const commonPlugins = [
     Fonts({
       google: {
-        families: [{ name: "Open Sans", styles: "wght@0,300..800;1,300..800" }],
+        families: [{ name: "Intel One Mono", styles: "wght@400;500;600;700" }],
       },
     }),
   ];
