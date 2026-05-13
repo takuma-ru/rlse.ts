@@ -1,13 +1,7 @@
 :root {
   font-family:
-    "Intel One Mono",
-    ui-monospace,
-    SFMono-Regular,
-    "SF Mono",
-    Menlo,
-    Consolas,
-    "Liberation Mono",
-    monospace;
+    "Intel One Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
@@ -102,14 +96,8 @@ td {
 .shiki,
 .shiki span {
   font-family:
-    "Intel One Mono",
-    ui-monospace,
-    SFMono-Regular,
-    "SF Mono",
-    Menlo,
-    Consolas,
-    "Liberation Mono",
-    monospace;
+    "Intel One Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
   background-color: var(--background-secondary) !important;
 }
 

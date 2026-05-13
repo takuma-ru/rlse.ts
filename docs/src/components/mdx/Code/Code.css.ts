@@ -7,12 +7,6 @@ export const inlineCode = css`
   border-radius: 0.25em;
   font-size: 0.9em;
   font-family:
-    "Intel One Mono",
-    ui-monospace,
-    SFMono-Regular,
-    "SF Mono",
-    Menlo,
-    Consolas,
-    "Liberation Mono",
-    monospace;
+    "Intel One Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
 `;
