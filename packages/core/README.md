@@ -181,14 +181,15 @@ The following steps are exported from `steps`.
 
 **Git**
 
-| Step                                 | Description                                              | Options                            |
-| ------------------------------------ | -------------------------------------------------------- | ---------------------------------- |
-| `steps.configureGitUser(options)`    | Configures local git author settings for the repository. | `name`, `email`.                   |
-| `steps.createReleaseBranch(options)` | Creates and switches to a local release branch.          | `branch`.                          |
-| `steps.stageFiles(options)`          | Stages files with `git add`.                             | `paths`.                           |
-| `steps.commit(options)`              | Commits staged files.                                    | `message`, `skipIfNoChanges`.      |
-| `steps.tag(options)`                 | Creates a git tag and deletes it if a later step fails.  | `name`, `message`.                 |
-| `steps.push(options)`                | Pushes a branch to a remote.                             | `branch`, `remote`, `setUpstream`. |
+| Step                                 | Description                                                    | Options                            |
+| ------------------------------------ | -------------------------------------------------------------- | ---------------------------------- |
+| `steps.configureGitUser(options)`    | Configures local git author settings for the repository.       | `name`, `email`.                   |
+| `steps.createReleaseBranch(options)` | Creates and switches to a local release branch.                | `branch`.                          |
+| `steps.stageFiles(options)`          | Stages files with `git add`.                                   | `paths`.                           |
+| `steps.commit(options)`              | Commits staged files.                                          | `message`, `skipIfNoChanges`.      |
+| `steps.tag(options)`                 | Creates a git tag and deletes it if a later step fails.        | `name`, `message`.                 |
+| `steps.push(options)`                | Pushes a branch to a remote.                                   | `branch`, `remote`, `setUpstream`. |
+| `steps.pushTag(options)`             | Pushes a tag to a remote and deletes it if a later step fails. | `tag`, `remote`.                   |
 
 **Release Outputs**
 

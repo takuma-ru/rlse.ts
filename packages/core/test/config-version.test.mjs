@@ -534,6 +534,72 @@ test("rolls back created git tags when a later step fails", async () => {
   }
 });
 
+test("rolls back pushed git tags when a later step fails", async () => {
+  const projectDir = createTempProject();
+  const remoteDir = mkdtempSync(path.join(tmpdir(), "rlse-remote-"));
+
+  try {
+    commitAll(projectDir);
+    execFileSync("git", ["init", "--bare", remoteDir], {
+      stdio: "pipe",
+    });
+
+    const { runFlow, steps } = await import(publicApiPath);
+
+    await assert.rejects(
+      () =>
+        runFlow(
+          [
+            steps.tag({ name: "v1.2.3" }),
+            steps.pushTag({ tag: "v1.2.3", remote: remoteDir }),
+            {
+              name: "fail",
+              run: () => {
+                throw new Error("fail after push tag");
+              },
+            },
+          ],
+          { cwd: projectDir },
+        ),
+      /fail after push tag/,
+    );
+
+    const remoteTags = execFileSync(
+      "git",
+      ["--git-dir", remoteDir, "tag", "--list", "v1.2.3"],
+      {
+        encoding: "utf8",
+      },
+    ).trim();
+    const localTags = execFileSync("git", ["tag", "--list", "v1.2.3"], {
+      cwd: projectDir,
+      encoding: "utf8",
+    }).trim();
+
+    assert.equal(remoteTags, "");
+    assert.equal(localTags, "");
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+    rmSync(remoteDir, { recursive: true, force: true });
+  }
+});
+
+test("skips pushing git tags during dry-run", async () => {
+  const { runFlow, steps } = await import(publicApiPath);
+
+  const context = await runFlow(
+    [steps.pushTag({ tag: "v1.2.3", remote: "origin" })],
+    { dryRun: true },
+  );
+
+  assert.deepEqual(context.results.findStep("pushTag"), {
+    tag: "v1.2.3",
+    remote: "origin",
+    dryRun: true,
+    pushed: false,
+  });
+});
+
 test("skips github release creation during dry-run", async () => {
   const { runFlow, steps } = await import(publicApiPath);
 

@@ -60,6 +60,12 @@ export type RlseKnownStepResults = {
     dryRun: boolean;
     released: boolean;
   };
+  pushTag: {
+    tag: string;
+    remote: string;
+    dryRun: boolean;
+    pushed: boolean;
+  };
   updateChangelog: {
     path: string;
     version: string;
