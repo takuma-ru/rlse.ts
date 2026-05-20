@@ -2,10 +2,12 @@ import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
 import { resolveOption, type Resolvable } from "../resolveOption";
+import type { GitArtifactIfExists } from "./releaseArtifacts";
 
 export const tag = (options: {
   name: Resolvable<string>;
   message?: Resolvable<string>;
+  ifExists?: Resolvable<GitArtifactIfExists>;
 }): RlseStep => ({
   name: "tag",
   run: (context) => {
@@ -13,7 +15,23 @@ export const tag = (options: {
     const message = options.message
       ? resolveOption(options.message, context)
       : undefined;
+    const ifExists = options.ifExists
+      ? resolveOption(options.ifExists, context)
+      : "fail";
     const args = message ? ["tag", "-a", name, "-m", message] : ["tag", name];
+    const exists = tagExists(name, context.cwd);
+
+    if (exists && ifExists === "skip") {
+      consola.info(`Tag ${name} already exists; skipping`);
+
+      return {
+        name,
+        message,
+        dryRun: context.dryRun,
+        tagged: false,
+        skipped: true,
+      };
+    }
 
     if (context.dryRun) {
       consola.info(`[dry-run] Skip git ${args.join(" ")}`);
@@ -23,6 +41,7 @@ export const tag = (options: {
         message,
         dryRun: true,
         tagged: false,
+        skipped: false,
       };
     }
 
@@ -42,6 +61,7 @@ export const tag = (options: {
       message,
       dryRun: false,
       tagged: true,
+      skipped: false,
     };
   },
   rollback: (context, result) => {
@@ -68,5 +88,19 @@ const isTagResult = (
     typeof value.name === "string" &&
     "tagged" in value &&
     typeof value.tagged === "boolean"
+  );
+};
+
+const tagExists = (name: string, cwd: string) => {
+  return Boolean(
+    cmdFile("git", ["rev-parse", "--verify", `refs/tags/${name}`], {
+      execOptions: {
+        cwd,
+        stdio: "pipe",
+        encoding: "utf8",
+      },
+      errorCallback: () => "",
+      silentError: true,
+    }),
   );
 };
