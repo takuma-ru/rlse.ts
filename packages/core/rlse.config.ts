@@ -16,5 +16,7 @@ export default defineConfig({
       resolvePackage: { name: "rlse.ts" },
       calculateNextSemver: { level: args.level },
       runCommand: "pnpm build",
+      commit: { message: "Release rlse.ts" },
+      push: { branch: "main" },
     }),
 });
