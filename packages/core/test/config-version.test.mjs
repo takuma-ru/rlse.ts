@@ -597,7 +597,86 @@ test("skips pushing git tags during dry-run", async () => {
     remote: "origin",
     dryRun: true,
     pushed: false,
+    skipped: false,
+    replaced: false,
   });
+});
+
+test("builds rerunnable release branch names from environment variables", async () => {
+  const previousRunId = process.env.GITHUB_RUN_ID;
+  const previousRunAttempt = process.env.GITHUB_RUN_ATTEMPT;
+
+  try {
+    process.env.GITHUB_RUN_ID = "12345";
+    process.env.GITHUB_RUN_ATTEMPT = "2";
+
+    const { runFlow, steps } = await import(publicApiPath);
+    const branch = steps.releaseBranchName({
+      version: "1.2.3",
+      suffix: steps.env(["GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"]),
+    });
+    const context = await runFlow([
+      {
+        name: "branchName",
+        run: (rlseContext) => branch(rlseContext),
+      },
+    ]);
+
+    assert.equal(
+      context.results.findStep("branchName"),
+      "release/1.2.3-12345-2",
+    );
+  } finally {
+    if (previousRunId === undefined) {
+      delete process.env.GITHUB_RUN_ID;
+    } else {
+      process.env.GITHUB_RUN_ID = previousRunId;
+    }
+
+    if (previousRunAttempt === undefined) {
+      delete process.env.GITHUB_RUN_ATTEMPT;
+    } else {
+      process.env.GITHUB_RUN_ATTEMPT = previousRunAttempt;
+    }
+  }
+});
+
+test("skips pushing existing git tags when requested", async () => {
+  const projectDir = createTempProject();
+  const remoteDir = mkdtempSync(path.join(tmpdir(), "rlse-remote-"));
+
+  try {
+    commitAll(projectDir);
+    execFileSync("git", ["init", "--bare", remoteDir], {
+      stdio: "pipe",
+    });
+    execFileSync("git", ["tag", "v1.2.3"], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+    execFileSync("git", ["push", remoteDir, "refs/tags/v1.2.3"], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+
+    const { runFlow, steps } = await import(publicApiPath);
+    const context = await runFlow(
+      [steps.pushTag({ tag: "v1.2.3", remote: remoteDir, ifExists: "skip" })],
+      { cwd: projectDir },
+    );
+
+    assert.deepEqual(context.results.findStep("pushTag"), {
+      tag: "v1.2.3",
+      remote: remoteDir,
+      dryRun: false,
+      pushed: false,
+      skipped: true,
+      replaced: false,
+    });
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+    rmSync(remoteDir, { recursive: true, force: true });
+  }
 });
 
 test("skips github release creation during dry-run", async () => {
