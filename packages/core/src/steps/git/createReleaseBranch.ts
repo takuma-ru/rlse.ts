@@ -45,7 +45,6 @@ export const createReleaseBranch = (options: {
         dryRun: context.dryRun,
         created: false,
         skipped: true,
-        replaced: false,
       };
     }
 
@@ -58,17 +57,7 @@ export const createReleaseBranch = (options: {
         dryRun: true,
         created: false,
         skipped: false,
-        replaced: false,
       };
-    }
-
-    if (exists && ifExists === "replace") {
-      cmdFile("git", ["branch", "-D", branch], {
-        execOptions: {
-          cwd: context.cwd,
-          encoding: "utf8",
-        },
-      });
     }
 
     cmdFile("git", ["switch", "-c", branch], {
@@ -88,7 +77,6 @@ export const createReleaseBranch = (options: {
       dryRun: false,
       created: true,
       skipped: false,
-      replaced: exists && ifExists === "replace",
     };
   },
   rollback: (context, result) => {

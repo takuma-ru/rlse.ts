@@ -1,7 +1,7 @@
 import type { RlseContext } from "../../flow/types";
 import { resolveOption, type Resolvable } from "../resolveOption";
 
-export type GitArtifactIfExists = "fail" | "skip" | "replace";
+export type GitArtifactIfExists = "fail" | "skip";
 
 export const env = (
   names: string | string[],

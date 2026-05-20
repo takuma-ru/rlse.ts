@@ -41,7 +41,6 @@ export type RlseKnownStepResults = {
     dryRun: boolean;
     created: boolean;
     skipped: boolean;
-    replaced: boolean;
   };
   tag: {
     name: string;
@@ -49,7 +48,6 @@ export type RlseKnownStepResults = {
     dryRun: boolean;
     tagged: boolean;
     skipped: boolean;
-    replaced: boolean;
   };
   checkGitHubAuth: {
     authenticated: boolean;
@@ -76,7 +74,6 @@ export type RlseKnownStepResults = {
     dryRun: boolean;
     pushed: boolean;
     skipped: boolean;
-    replaced: boolean;
   };
   updateChangelog: {
     path: string;
@@ -105,7 +102,6 @@ export type RlseKnownStepResults = {
     dryRun: boolean;
     pushed: boolean;
     skipped: boolean;
-    replaced: boolean;
   };
 };
 

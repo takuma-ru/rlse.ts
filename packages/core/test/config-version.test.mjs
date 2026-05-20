@@ -598,7 +598,6 @@ test("skips pushing git tags during dry-run", async () => {
     dryRun: true,
     pushed: false,
     skipped: false,
-    replaced: false,
   });
 });
 
@@ -671,7 +670,6 @@ test("skips pushing existing git tags when requested", async () => {
       dryRun: false,
       pushed: false,
       skipped: true,
-      replaced: false,
     });
   } finally {
     rmSync(projectDir, { recursive: true, force: true });

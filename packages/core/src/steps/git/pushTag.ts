@@ -33,12 +33,7 @@ export const pushTag = (options: {
         dryRun: context.dryRun,
         pushed: false,
         skipped: true,
-        replaced: false,
       };
-    }
-
-    if (exists && ifExists === "replace") {
-      args.splice(1, 0, `--force-with-lease=refs/tags/${tag}:${remoteHead}`);
     }
 
     if (context.dryRun) {
@@ -50,7 +45,6 @@ export const pushTag = (options: {
         dryRun: true,
         pushed: false,
         skipped: false,
-        replaced: false,
       };
     }
 
@@ -71,7 +65,6 @@ export const pushTag = (options: {
       dryRun: false,
       pushed: true,
       skipped: false,
-      replaced: exists && ifExists === "replace",
     };
   },
   rollback: (context, result) => {

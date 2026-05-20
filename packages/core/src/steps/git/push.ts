@@ -42,16 +42,7 @@ export const push = (options: {
         dryRun: context.dryRun,
         pushed: false,
         skipped: true,
-        replaced: false,
       };
-    }
-
-    if (exists && ifExists === "replace") {
-      args.splice(
-        1,
-        0,
-        `--force-with-lease=refs/heads/${branch}:${remoteHead}`,
-      );
     }
 
     if (context.dryRun) {
@@ -64,7 +55,6 @@ export const push = (options: {
         dryRun: true,
         pushed: false,
         skipped: false,
-        replaced: false,
       };
     }
 
@@ -86,7 +76,6 @@ export const push = (options: {
       dryRun: false,
       pushed: true,
       skipped: false,
-      replaced: exists && ifExists === "replace",
     };
   },
 });

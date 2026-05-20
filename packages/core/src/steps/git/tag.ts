@@ -30,7 +30,6 @@ export const tag = (options: {
         dryRun: context.dryRun,
         tagged: false,
         skipped: true,
-        replaced: false,
       };
     }
 
@@ -43,17 +42,7 @@ export const tag = (options: {
         dryRun: true,
         tagged: false,
         skipped: false,
-        replaced: false,
       };
-    }
-
-    if (exists && ifExists === "replace") {
-      cmdFile("git", ["tag", "-d", name], {
-        execOptions: {
-          cwd: context.cwd,
-          encoding: "utf8",
-        },
-      });
     }
 
     cmdFile("git", args, {
@@ -73,7 +62,6 @@ export const tag = (options: {
       dryRun: false,
       tagged: true,
       skipped: false,
-      replaced: exists && ifExists === "replace",
     };
   },
   rollback: (context, result) => {
