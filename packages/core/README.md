@@ -193,11 +193,15 @@ The following steps are exported from `steps`.
 
 **Release Outputs**
 
-| Step                               | Description                                                                             | Options                                         |
-| ---------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| `steps.publishNpmPackage(options)` | Publishes a package with `npm publish`.                                                 | `packageName`, `packageDir`, `dryRun`.          |
-| `steps.githubRelease(options)`     | Creates a GitHub Release with `gh release create` and deletes it if a later step fails. | `tag`, `title`, `notes`, `draft`, `prerelease`. |
-| `steps.updateChangelog(options)`   | Adds a version entry to a changelog and rolls it back if a later step fails.            | `version`, `path`, `date`, `changes`.           |
+| Step                               | Description                                                                             | Options                                                 |
+| ---------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `steps.publishNpmPackage(options)` | Publishes a package with `npm publish`.                                                 | `packageName`, `packageDir`, `dryRun`, `dryRunVersion`. |
+| `steps.githubRelease(options)`     | Creates a GitHub Release with `gh release create` and deletes it if a later step fails. | `tag`, `title`, `notes`, `draft`, `prerelease`.         |
+| `steps.updateChangelog(options)`   | Adds a version entry to a changelog and rolls it back if a later step fails.            | `version`, `path`, `date`, `changes`.                   |
+
+When `dryRunVersion` is provided and publish runs in dry-run mode,
+`publishNpmPackage` temporarily writes that version to `package.json`, runs
+`npm publish --dry-run`, and restores the original file content afterward.
 
 **Commands**
 

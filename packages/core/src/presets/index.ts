@@ -84,6 +84,8 @@ export const npmRelease = (options: NpmReleaseOptions): RlseFlowStep[] => {
         packageName: (context) => getResolvePackageResult(context).packageName,
         packageDir: (context) =>
           path.dirname(getResolvePackageResult(context).packageJsonPath),
+        dryRunVersion: (context) =>
+          getCalculateNextSemverResult(context).nextVersion,
       }),
     );
 
