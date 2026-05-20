@@ -640,6 +640,154 @@ test("builds rerunnable release branch names from environment variables", async 
   }
 });
 
+test("respects empty release branch name options", async () => {
+  const { runFlow, steps } = await import(publicApiPath);
+  const branch = steps.releaseBranchName({
+    version: "1.2.3",
+    prefix: "",
+    suffix: "",
+    separator: "",
+  });
+  const context = await runFlow([
+    {
+      name: "branchName",
+      run: (rlseContext) => branch(rlseContext),
+    },
+  ]);
+
+  assert.equal(context.results.findStep("branchName"), "1.2.3-");
+});
+
+test("skips existing local git tags when requested", async () => {
+  const projectDir = createTempProject();
+
+  try {
+    commitAll(projectDir);
+    execFileSync("git", ["tag", "v1.2.3"], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+    const tagBefore = execFileSync("git", ["rev-parse", "refs/tags/v1.2.3"], {
+      cwd: projectDir,
+      encoding: "utf8",
+    }).trim();
+
+    const { runFlow, steps } = await import(publicApiPath);
+    const context = await runFlow(
+      [steps.tag({ name: "v1.2.3", ifExists: "skip" })],
+      { cwd: projectDir },
+    );
+    const tagAfter = execFileSync("git", ["rev-parse", "refs/tags/v1.2.3"], {
+      cwd: projectDir,
+      encoding: "utf8",
+    }).trim();
+
+    assert.deepEqual(context.results.findStep("tag"), {
+      name: "v1.2.3",
+      message: undefined,
+      dryRun: false,
+      tagged: false,
+      skipped: true,
+    });
+    assert.equal(tagAfter, tagBefore);
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
+
+test("restores base branch after skipping an existing release branch", async () => {
+  const projectDir = createTempProject();
+
+  try {
+    commitAll(projectDir);
+    execFileSync("git", ["branch", "release/1.2.3"], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+    const branchBefore = execFileSync(
+      "git",
+      ["rev-parse", "refs/heads/release/1.2.3"],
+      {
+        cwd: projectDir,
+        encoding: "utf8",
+      },
+    ).trim();
+
+    const { runFlow, steps } = await import(publicApiPath);
+    await assert.rejects(
+      () =>
+        runFlow(
+          [
+            steps.createReleaseBranch({
+              branch: "release/1.2.3",
+              ifExists: "skip",
+            }),
+            {
+              name: "fail",
+              run: () => {
+                throw new Error("fail after branch skip");
+              },
+            },
+          ],
+          { cwd: projectDir },
+        ),
+      /fail after branch skip/,
+    );
+
+    const currentBranch = execFileSync("git", ["branch", "--show-current"], {
+      cwd: projectDir,
+      encoding: "utf8",
+    }).trim();
+    const branchAfter = execFileSync(
+      "git",
+      ["rev-parse", "refs/heads/release/1.2.3"],
+      {
+        cwd: projectDir,
+        encoding: "utf8",
+      },
+    ).trim();
+
+    assert.equal(currentBranch, "main");
+    assert.equal(branchAfter, branchBefore);
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+});
+
+test("skips pushing existing git branches when requested", async () => {
+  const projectDir = createTempProject();
+  const remoteDir = mkdtempSync(path.join(tmpdir(), "rlse-remote-"));
+
+  try {
+    commitAll(projectDir);
+    execFileSync("git", ["init", "--bare", remoteDir], {
+      stdio: "pipe",
+    });
+    execFileSync("git", ["push", remoteDir, "main"], {
+      cwd: projectDir,
+      stdio: "pipe",
+    });
+
+    const { runFlow, steps } = await import(publicApiPath);
+    const context = await runFlow(
+      [steps.push({ branch: "main", remote: remoteDir, ifExists: "skip" })],
+      { cwd: projectDir },
+    );
+
+    assert.deepEqual(context.results.findStep("push"), {
+      branch: "main",
+      remote: remoteDir,
+      setUpstream: false,
+      dryRun: false,
+      pushed: false,
+      skipped: true,
+    });
+  } finally {
+    rmSync(projectDir, { recursive: true, force: true });
+    rmSync(remoteDir, { recursive: true, force: true });
+  }
+});
+
 test("skips pushing existing git tags when requested", async () => {
   const projectDir = createTempProject();
   const remoteDir = mkdtempSync(path.join(tmpdir(), "rlse-remote-"));

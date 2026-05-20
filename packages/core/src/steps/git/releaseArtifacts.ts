@@ -28,19 +28,22 @@ export const releaseBranchName = (options: {
   separator?: Resolvable<string>;
 }) => {
   return (context: RlseContext) => {
-    const prefix = options.prefix
-      ? resolveOption(options.prefix, context)
-      : "release";
+    const prefix =
+      options.prefix !== undefined
+        ? resolveOption(options.prefix, context)
+        : "release";
     const version = resolveOption(options.version, context);
-    const suffix = options.suffix
-      ? resolveOption(options.suffix, context)
-      : undefined;
-    const separator = options.separator
-      ? resolveOption(options.separator, context)
-      : "/";
+    const suffix =
+      options.suffix !== undefined
+        ? resolveOption(options.suffix, context)
+        : undefined;
+    const separator =
+      options.separator !== undefined
+        ? resolveOption(options.separator, context)
+        : "/";
     const name = `${prefix}${separator}${version}`;
 
-    if (!suffix) {
+    if (suffix === false || suffix === undefined) {
       return name;
     }
 
