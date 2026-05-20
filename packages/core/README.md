@@ -83,6 +83,25 @@ export default defineConfig([
 ]);
 ```
 
+Use `releaseBranchName` and `env` when a CI flow needs rerunnable
+version-derived branch names from environment variables.
+
+```ts filename=rlse.config.ts
+import { defineConfig, steps } from "rlse.ts";
+
+const releaseBranch = steps.releaseBranchName({
+  version: ({ results }) => results.findStep("calculateNextSemver").nextVersion,
+  suffix: steps.env(["GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"]),
+});
+
+export default defineConfig([
+  // version calculation steps...
+  steps.createReleaseBranch({ branch: releaseBranch, ifExists: "skip" }),
+  // release side-effect steps...
+  steps.push({ branch: releaseBranch, setUpstream: true, ifExists: "skip" }),
+]);
+```
+
 Use primitives directly only when you need full control over every side effect.
 
 ```ts filename=rlse.config.ts
@@ -141,15 +160,15 @@ Rlse exports `defineConfig`, `presets`, `steps`, `runFlow`, and `z`.
 Use presets for the common path. Use individual steps when you need to insert,
 remove, or reorder release side effects.
 
-| Group           | Steps                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------- |
-| Auth checks     | `checkAuth`, `checkGitHubAuth`, `checkNpmToken`                                           |
-| Package/version | `resolvePackage`, `resolvePublishedVersion`, `calculateNextSemver`, `writePackageVersion` |
-| Safety checks   | `checkCleanWorkingTree`, `checkNpmPackageVersionAvailable`, `verifyPublishedNpmPackage`   |
-| Git operations  | `configureGitUser`, `createReleaseBranch`, `stageFiles`, `commit`, `tag`, `push`          |
-| Release outputs | `publishNpmPackage`, `githubRelease`, `updateChangelog`                                   |
-| Commands        | `runCommand`                                                                              |
-| Flow control    | `parallel`                                                                                |
+| Group           | Steps                                                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Auth checks     | `checkAuth`, `checkGitHubAuth`, `checkNpmToken`                                                                         |
+| Package/version | `resolvePackage`, `resolvePublishedVersion`, `calculateNextSemver`, `writePackageVersion`                               |
+| Safety checks   | `checkCleanWorkingTree`, `checkNpmPackageVersionAvailable`, `verifyPublishedNpmPackage`                                 |
+| Git operations  | `configureGitUser`, `createReleaseBranch`, `releaseBranchName`, `env`, `stageFiles`, `commit`, `tag`, `push`, `pushTag` |
+| Release outputs | `publishNpmPackage`, `githubRelease`, `updateChangelog`                                                                 |
+| Commands        | `runCommand`                                                                                                            |
+| Flow control    | `parallel`                                                                                                              |
 
 #### Step Reference
 
@@ -182,15 +201,17 @@ The following steps are exported from `steps`.
 
 **Git**
 
-| Step                                 | Description                                                    | Options                            |
-| ------------------------------------ | -------------------------------------------------------------- | ---------------------------------- |
-| `steps.configureGitUser(options)`    | Configures local git author settings for the repository.       | `name`, `email`.                   |
-| `steps.createReleaseBranch(options)` | Creates and switches to a local release branch.                | `branch`.                          |
-| `steps.stageFiles(options)`          | Stages files with `git add`.                                   | `paths`.                           |
-| `steps.commit(options)`              | Commits staged files.                                          | `message`, `skipIfNoChanges`.      |
-| `steps.tag(options)`                 | Creates a git tag and deletes it if a later step fails.        | `name`, `message`.                 |
-| `steps.push(options)`                | Pushes a branch to a remote.                                   | `branch`, `remote`, `setUpstream`. |
-| `steps.pushTag(options)`             | Pushes a tag to a remote and deletes it if a later step fails. | `tag`, `remote`.                   |
+| Step                                 | Description                                                       | Options                                        |
+| ------------------------------------ | ----------------------------------------------------------------- | ---------------------------------------------- |
+| `steps.configureGitUser(options)`    | Configures local git author settings for the repository.          | `name`, `email`.                               |
+| `steps.createReleaseBranch(options)` | Creates and switches to a local release branch.                   | `branch`, `ifExists`.                          |
+| `steps.releaseBranchName(options)`   | Returns a resolvable release branch name with an optional suffix. | `version`, `prefix`, `suffix`, `separator`.    |
+| `steps.env(names, options)`          | Reads one or more environment variables for config values.        | `names`, `fallback`, `separator`.              |
+| `steps.stageFiles(options)`          | Stages files with `git add`.                                      | `paths`.                                       |
+| `steps.commit(options)`              | Commits staged files.                                             | `message`, `skipIfNoChanges`.                  |
+| `steps.tag(options)`                 | Creates a git tag and deletes it if a later step fails.           | `name`, `message`, `ifExists`.                 |
+| `steps.push(options)`                | Pushes a branch to a remote.                                      | `branch`, `remote`, `setUpstream`, `ifExists`. |
+| `steps.pushTag(options)`             | Pushes a tag to a remote and deletes it if a later step fails.    | `tag`, `remote`, `ifExists`.                   |
 
 **Release Outputs**
 

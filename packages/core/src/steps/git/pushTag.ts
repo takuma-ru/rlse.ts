@@ -2,10 +2,12 @@ import consola from "consola";
 import type { RlseStep } from "../../flow/types";
 import { cmdFile } from "../../utils/cmd";
 import { resolveOption, type Resolvable } from "../resolveOption";
+import type { GitArtifactIfExists } from "./releaseArtifacts";
 
 export const pushTag = (options: {
   tag: Resolvable<string>;
   remote?: Resolvable<string>;
+  ifExists?: Resolvable<GitArtifactIfExists>;
 }): RlseStep => ({
   name: "pushTag",
   run: (context) => {
@@ -13,7 +15,26 @@ export const pushTag = (options: {
     const remote = options.remote
       ? resolveOption(options.remote, context)
       : "origin";
+    const ifExists = options.ifExists
+      ? resolveOption(options.ifExists, context)
+      : "fail";
     const args = ["push", remote, `refs/tags/${tag}`];
+    const remoteHead = context.dryRun
+      ? false
+      : getRemoteTagHead(remote, tag, context.cwd);
+    const exists = Boolean(remoteHead);
+
+    if (exists && ifExists === "skip") {
+      consola.info(`Tag ${tag} already exists on ${remote}; skipping push`);
+
+      return {
+        tag,
+        remote,
+        dryRun: context.dryRun,
+        pushed: false,
+        skipped: true,
+      };
+    }
 
     if (context.dryRun) {
       consola.info(`[dry-run] Skip git ${args.join(" ")}`);
@@ -23,6 +44,7 @@ export const pushTag = (options: {
         remote,
         dryRun: true,
         pushed: false,
+        skipped: false,
       };
     }
 
@@ -42,6 +64,7 @@ export const pushTag = (options: {
       remote,
       dryRun: false,
       pushed: true,
+      skipped: false,
     };
   },
   rollback: (context, result) => {
@@ -75,4 +98,22 @@ const isPushTagResult = (
     "pushed" in value &&
     typeof value.pushed === "boolean"
   );
+};
+
+const getRemoteTagHead = (remote: string, tag: string, cwd: string) => {
+  const stdout = cmdFile(
+    "git",
+    ["ls-remote", "--exit-code", "--refs", "--tags", remote, tag],
+    {
+      execOptions: {
+        cwd,
+        stdio: "pipe",
+        encoding: "utf8",
+      },
+      errorCallback: () => "",
+      silentError: true,
+    },
+  );
+
+  return stdout.trim().split(/\s+/)[0];
 };
