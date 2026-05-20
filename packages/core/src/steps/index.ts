@@ -12,6 +12,7 @@ export * from "./git/pushTag";
 export * from "./git/stageFiles";
 export * from "./git/tag";
 export * from "./package/resolvePackage";
+export * from "./parallel";
 export * from "./publish/checkNpmPackageVersionAvailable";
 export * from "./publish/publish";
 export * from "./publish/verifyPublishedNpmPackage";

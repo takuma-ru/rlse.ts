@@ -105,3 +105,21 @@ export type RlseStep = {
 };
 
 export type RlseFlowStep = RlseStep | RlseStepRunner;
+
+export type RlseParallelTaskResult = {
+  name: string;
+  status: "succeeded" | "failed" | "skipped";
+  value?: unknown;
+  error?: unknown;
+};
+
+export type RlseParallelResult = {
+  ok: boolean;
+  dryRun: boolean;
+  concurrency: number;
+  taskCount: number;
+  tasks: Record<string, RlseParallelTaskResult>;
+  succeededTaskNames: string[];
+  failedTaskNames: string[];
+  skippedTaskNames: string[];
+};
