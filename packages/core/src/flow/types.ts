@@ -35,11 +35,21 @@ export type RlseKnownStepResults = {
     clean: boolean;
     allowUntracked: boolean;
   };
+  createReleaseBranch: {
+    baseBranch: string;
+    branch: string;
+    dryRun: boolean;
+    created: boolean;
+    skipped: boolean;
+    replaced: boolean;
+  };
   tag: {
     name: string;
     message?: string;
     dryRun: boolean;
     tagged: boolean;
+    skipped: boolean;
+    replaced: boolean;
   };
   checkGitHubAuth: {
     authenticated: boolean;
@@ -65,6 +75,8 @@ export type RlseKnownStepResults = {
     remote: string;
     dryRun: boolean;
     pushed: boolean;
+    skipped: boolean;
+    replaced: boolean;
   };
   updateChangelog: {
     path: string;
@@ -85,6 +97,15 @@ export type RlseKnownStepResults = {
     version: string;
     dryRun: boolean;
     verified: boolean;
+  };
+  push: {
+    branch: string;
+    remote: string;
+    setUpstream: boolean;
+    dryRun: boolean;
+    pushed: boolean;
+    skipped: boolean;
+    replaced: boolean;
   };
 };
 

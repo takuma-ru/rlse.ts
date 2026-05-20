@@ -9,6 +9,7 @@ export * from "./git/configureGit";
 export * from "./git/createReleaseBranch";
 export * from "./git/push";
 export * from "./git/pushTag";
+export * from "./git/releaseArtifacts";
 export * from "./git/stageFiles";
 export * from "./git/tag";
 export * from "./package/resolvePackage";
