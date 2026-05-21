@@ -574,6 +574,53 @@ test("rolls back successful parallel tasks on failure", async () => {
   ]);
 });
 
+test("does not start queued parallel tasks after observing a failure", async () => {
+  const { runFlow, steps } = await import(publicApiPath);
+  const events = [];
+
+  await assert.rejects(
+    () =>
+      runFlow([
+        steps.parallel({
+          name: "parallelFailFast",
+          concurrency: 2,
+          tasks: [
+            {
+              name: "task:succeed",
+              run: () => {
+                events.push("run:succeed");
+                return "succeed-result";
+              },
+              rollback: (_, result) => {
+                events.push(`rollback:${result.step}:${result.value}`);
+              },
+            },
+            {
+              name: "task:fail",
+              run: () => {
+                events.push("run:fail");
+                return Promise.reject(new Error("fail rejected"));
+              },
+            },
+            {
+              name: "task:queued",
+              run: () => {
+                events.push("run:queued");
+              },
+            },
+          ],
+        }),
+      ]),
+    /Parallel step parallelFailFast failed for: task:fail/,
+  );
+
+  assert.deepEqual(events, [
+    "run:succeed",
+    "run:fail",
+    "rollback:task:succeed:succeed-result",
+  ]);
+});
+
 test("checks for a clean working tree", async () => {
   const projectDir = createTempProject();
 

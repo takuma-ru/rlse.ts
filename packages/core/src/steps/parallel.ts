@@ -15,6 +15,23 @@ export type ParallelTask = {
   ) => Promise<void> | void;
 };
 
+type RunningTask = {
+  task: ParallelTask;
+  promise: Promise<TaskOutcome>;
+};
+
+type TaskOutcome =
+  | {
+      runningTask: RunningTask;
+      status: "succeeded";
+      value: unknown;
+    }
+  | {
+      runningTask: RunningTask;
+      status: "failed";
+      error: unknown;
+    };
+
 export const parallel = (options: {
   name: string;
   concurrency?: number;
@@ -54,47 +71,82 @@ export const parallel = (options: {
     let nextTaskIndex = 0;
     let stopStartingTasks = false;
 
-    const runNextTask = async (): Promise<void> => {
-      while (!stopStartingTasks) {
-        const task = options.tasks[nextTaskIndex];
-        nextTaskIndex += 1;
+    const runningTasks = new Set<RunningTask>();
 
-        if (!task) {
-          return;
-        }
+    const startNextTask = () => {
+      if (stopStartingTasks) {
+        return false;
+      }
 
-        consola.start(`[${task.name}] started`);
+      const task = options.tasks[nextTaskIndex];
 
-        try {
-          const value = await task.run(context);
-          const taskResult = { step: task.name, value };
-          result.tasks[task.name] = {
-            name: task.name,
-            status: "succeeded",
-            value,
-          };
-          result.succeededTaskNames.push(task.name);
-          completedTasks.push({ task, result: taskResult });
-          consola.success(`[${task.name}] succeeded`);
-        } catch (error) {
-          stopStartingTasks = true;
-          taskFailures.push({ name: task.name, error });
-          result.tasks[task.name] = {
-            name: task.name,
-            status: "failed",
-            error,
-          };
-          result.failedTaskNames.push(task.name);
-          consola.error(`[${task.name}] failed`);
+      if (!task) {
+        return false;
+      }
+
+      nextTaskIndex += 1;
+      consola.start(`[${task.name}] started`);
+
+      const runningTask = { task } as RunningTask;
+      runningTask.promise = runTask(context, runningTask, () => {
+        stopStartingTasks = true;
+      });
+      runningTasks.add(runningTask);
+
+      return true;
+    };
+
+    const fillConcurrency = () => {
+      while (runningTasks.size < concurrency) {
+        if (!startNextTask()) {
+          break;
         }
       }
     };
 
-    await Promise.all(
-      Array.from({ length: concurrency }, async () => {
-        await runNextTask();
-      }),
-    );
+    fillConcurrency();
+
+    while (runningTasks.size > 0) {
+      const outcome = await Promise.race(
+        Array.from(runningTasks, ({ promise }) => promise),
+      );
+      runningTasks.delete(outcome.runningTask);
+
+      if (outcome.status === "succeeded") {
+        const taskResult = {
+          step: outcome.runningTask.task.name,
+          value: outcome.value,
+        };
+        result.tasks[outcome.runningTask.task.name] = {
+          name: outcome.runningTask.task.name,
+          status: "succeeded",
+          value: outcome.value,
+        };
+        result.succeededTaskNames.push(outcome.runningTask.task.name);
+        completedTasks.push({
+          task: outcome.runningTask.task,
+          result: taskResult,
+        });
+        consola.success(`[${outcome.runningTask.task.name}] succeeded`);
+        // Let same-turn task failures set stopStartingTasks before filling an open slot.
+        await Promise.resolve();
+      } else {
+        stopStartingTasks = true;
+        taskFailures.push({
+          name: outcome.runningTask.task.name,
+          error: outcome.error,
+        });
+        result.tasks[outcome.runningTask.task.name] = {
+          name: outcome.runningTask.task.name,
+          status: "failed",
+          error: outcome.error,
+        };
+        result.failedTaskNames.push(outcome.runningTask.task.name);
+        consola.error(`[${outcome.runningTask.task.name}] failed`);
+      }
+
+      fillConcurrency();
+    }
 
     if (taskFailures.length > 0) {
       result.ok = false;
@@ -109,6 +161,29 @@ export const parallel = (options: {
     return result;
   },
 });
+
+const runTask = async (
+  context: RlseContext,
+  runningTask: RunningTask,
+  onFailure: () => void,
+): Promise<TaskOutcome> => {
+  try {
+    const value = await runningTask.task.run(context);
+    return {
+      runningTask,
+      status: "succeeded",
+      value,
+    };
+  } catch (error) {
+    onFailure();
+
+    return {
+      runningTask,
+      status: "failed",
+      error,
+    };
+  }
+};
 
 const createParallelResult = (
   tasks: ParallelTask[],
