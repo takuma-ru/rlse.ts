@@ -233,6 +233,9 @@ The following steps are exported from `steps`.
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
 | `steps.parallel(options)` | Runs independent tasks concurrently inside one flow step, with aggregate results and rollback for successful tasks. | `name`, `tasks`, `concurrency`. |
 
+Parallel task name lists are recorded in completion order. On failure, only
+successful tasks are rolled back, in reverse completion order.
+
 Custom steps can be added with `(context) => { ... }`.
 
 CLI arguments can be declared with Zod in config and used when building the flow.

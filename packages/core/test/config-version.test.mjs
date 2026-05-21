@@ -621,6 +621,45 @@ test("does not start queued parallel tasks after observing a failure", async () 
   ]);
 });
 
+test("includes rollback failures in parallel task errors", async () => {
+  const { runFlow, steps } = await import(publicApiPath);
+
+  await assert.rejects(
+    () =>
+      runFlow([
+        steps.parallel({
+          name: "parallelRollbackFailure",
+          concurrency: 1,
+          tasks: [
+            {
+              name: "task:succeed",
+              run: () => "succeed-result",
+              rollback: () => {
+                throw new Error("rollback failed");
+              },
+            },
+            {
+              name: "task:fail",
+              run: () => {
+                throw new Error("task failed");
+              },
+            },
+          ],
+        }),
+      ]),
+    (error) => {
+      assert.ok(error instanceof AggregateError);
+      assert.match(
+        error.message,
+        /Parallel step parallelRollbackFailure failed for: task:fail; rollback failed for: task:succeed/,
+      );
+      assert.equal(error.errors.length, 2);
+
+      return true;
+    },
+  );
+});
+
 test("checks for a clean working tree", async () => {
   const projectDir = createTempProject();
 
