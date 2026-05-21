@@ -168,6 +168,7 @@ remove, or reorder release side effects.
 | Git operations  | `configureGitUser`, `createReleaseBranch`, `releaseBranchName`, `env`, `stageFiles`, `commit`, `tag`, `push`, `pushTag` |
 | Release outputs | `publishNpmPackage`, `githubRelease`, `updateChangelog`                                                                 |
 | Commands        | `runCommand`                                                                                                            |
+| Flow control    | `parallel`                                                                                                              |
 
 #### Step Reference
 
@@ -225,6 +226,15 @@ The following steps are exported from `steps`.
 | Step                                 | Description                                              | Options                                      |
 | ------------------------------------ | -------------------------------------------------------- | -------------------------------------------- |
 | `steps.runCommand(command, options)` | Runs a shell command from the current working directory. | Same options as the internal command helper. |
+
+**Flow Control**
+
+| Step                      | Description                                                                                                         | Options                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `steps.parallel(options)` | Runs independent tasks concurrently inside one flow step, with aggregate results and rollback for successful tasks. | `name`, `tasks`, `concurrency`. |
+
+Parallel task name lists are recorded in completion order. On failure, only
+successful tasks are rolled back, in reverse completion order.
 
 Custom steps can be added with `(context) => { ... }`.
 
